@@ -58,12 +58,11 @@
  * ............................................................................
  */
 
-/* TO_DO: Adjust your language (cannot be "Sofia") */
 
-/* TO_DO: Language name */
+
 #define STR_LANGNAME	"NoteLang"
 
-/* TO_DO: Logical constants - adapt for your language */
+/*Logical constants  */
 #define NL_TRUE		1
 #define NL_FALSE		0
 #define NL_ERROR		(-1)	/* General error message */
@@ -79,7 +78,7 @@ NOTE: Some types may not be directly used by your language,
 */
 
 
-/* TO_DO: Define your typedefs */
+/* Typedefs */
 typedef char			nl_char;
 typedef char*			nl_string;
 typedef int				nl_int;

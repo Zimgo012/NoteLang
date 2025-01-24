@@ -96,58 +96,58 @@ enum READER_MODE {
 
 /* Offset declaration */
 typedef struct flag {
-	sofia_boln isEmpty;			/* indicates if the buffer is empty */
-	sofia_boln isFull;			/* indicates if the buffer is full */
-	sofia_boln isRead;			/* indicates if the buffer was completely read */
-	sofia_boln isMoved;			/* indicates if the buffer memory was changed */
+	nl_boln isEmpty;			/* indicates if the buffer is empty */
+	nl_boln isFull;			/* indicates if the buffer is full */
+	nl_boln isRead;			/* indicates if the buffer was completely read */
+	nl_boln isMoved;			/* indicates if the buffer memory was changed */
 } Flag;
 
 /* Offset declaration */
 typedef struct position {
-	sofia_intg wrte;			/* the offset to the add chars (in chars) */
-	sofia_intg read;			/* the offset to the get a char position (in chars) */
-	sofia_intg mark;			/* the offset to the mark position (in chars) */
+	nl_int wrte;			/* the offset to the add chars (in chars) */
+	nl_int read;			/* the offset to the get a char position (in chars) */
+	nl_int mark;			/* the offset to the mark position (in chars) */
 } Position;
 
 /* Buffer structure */
 typedef struct bufferReader {
-	sofia_string	content;			/* pointer to the beginning of character array (character buffer) */
-	sofia_intg		size;				/* current dynamic memory size (in bytes) allocated to character buffer */
-	sofia_intg		increment;			/* character array increment factor */
-	sofia_char		mode;				/* operational mode indicator */
+	nl_string	content;			/* pointer to the beginning of character array (character buffer) */
+	nl_int		size;				/* current dynamic memory size (in bytes) allocated to character buffer */
+	nl_int		increment;			/* character array increment factor */
+	nl_char		mode;				/* operational mode indicator */
 	Flag			flags;				/* contains character array reallocation flag and end-of-buffer flag */
 	Position		positions;			/* Offset / position field */
-	sofia_intg		histogram[NCHAR];	/* Statistics of chars */
-	sofia_intg		numReaderErrors;	/* Number of errors from Reader */
-	sofia_byte		checksum;
+	nl_int		histogram[NCHAR];	/* Statistics of chars */
+	nl_int		numReaderErrors;	/* Number of errors from Reader */
+	nl_byte		checksum;
 } Buffer, * BufferPointer;
 
 /* FUNCTIONS DECLARATION:  .................................. */
 /* General Operations */
-BufferPointer	readerCreate		(sofia_intg, sofia_intg, sofia_char);
-BufferPointer	readerAddChar		(BufferPointer const, sofia_char);
-sofia_boln		readerClear		    (BufferPointer const);
-sofia_boln		readerFree		    (BufferPointer const);
-sofia_boln		readerIsFull		(BufferPointer const);
-sofia_boln		readerIsEmpty		(BufferPointer const);
-sofia_boln		readerSetMark		(BufferPointer const, sofia_intg);
-sofia_intg		readerPrint		    (BufferPointer const);
-sofia_intg		readerLoad			(BufferPointer const, FILE* const);
-sofia_boln		readerRecover		(BufferPointer const);
-sofia_boln		readerRetract		(BufferPointer const);
-sofia_boln		readerRestore		(BufferPointer const);
-sofia_void		readerCalcChecksum	(BufferPointer const);
-sofia_boln		readerPrintFlags	(BufferPointer const);
-sofia_void		readerPrintStat     (BufferPointer const);
+BufferPointer	readerCreate		(nl_int, nl_int, nl_char);
+BufferPointer	readerAddChar		(BufferPointer const, nl_char);
+nl_boln		readerClear		    (BufferPointer const);
+nl_boln		readerFree		    (BufferPointer const);
+nl_boln		readerIsFull		(BufferPointer const);
+nl_boln		readerIsEmpty		(BufferPointer const);
+nl_boln		readerSetMark		(BufferPointer const, nl_int);
+nl_int		readerPrint		    (BufferPointer const);
+nl_int		readerLoad			(BufferPointer const, FILE* const);
+nl_boln		readerRecover		(BufferPointer const);
+nl_boln		readerRetract		(BufferPointer const);
+nl_boln		readerRestore		(BufferPointer const);
+nl_void		readerCalcChecksum	(BufferPointer const);
+nl_boln		readerPrintFlags	(BufferPointer const);
+nl_void		readerPrintStat     (BufferPointer const);
 /* Getters */
-sofia_char		readerGetChar		(BufferPointer const);
-sofia_string	readerGetContent	(BufferPointer const, sofia_intg);
-sofia_intg		readerGetPosRead	(BufferPointer const);
-sofia_intg		readerGetPosWrte	(BufferPointer const);
-sofia_intg		readerGetPosMark	(BufferPointer const);
-sofia_intg		readerGetSize		(BufferPointer const);
-sofia_intg		readerGetInc		(BufferPointer const);
-sofia_char		readerGetMode		(BufferPointer const);
-sofia_intg		readerGetNumErrors	(BufferPointer const);
+nl_char		readerGetChar		(BufferPointer const);
+nl_string	readerGetContent	(BufferPointer const, nl_int);
+nl_int		readerGetPosRead	(BufferPointer const);
+nl_int		readerGetPosWrte	(BufferPointer const);
+nl_int		readerGetPosMark	(BufferPointer const);
+nl_int		readerGetSize		(BufferPointer const);
+nl_int		readerGetInc		(BufferPointer const);
+nl_char		readerGetMode		(BufferPointer const);
+nl_int		readerGetNumErrors	(BufferPointer const);
 
 #endif

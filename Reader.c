@@ -83,9 +83,9 @@
  *************************************************************
  */
 
-BufferPointer readerCreate(sofia_intg size, sofia_intg increment, sofia_char mode) {
+BufferPointer readerCreate(nl_int size, nl_int increment, nl_char mode) {
 	BufferPointer readerPointer;
-	sofia_intg count = 0;
+	nl_int count = 0;
 	/* TO_DO: Defensive programming */
 	if (!size)
 		size = READER_DEFAULT_SIZE;
@@ -95,8 +95,8 @@ BufferPointer readerCreate(sofia_intg size, sofia_intg increment, sofia_char mod
 		mode = MODE_FIXED;
 	readerPointer = (BufferPointer)calloc(1, sizeof(Buffer));
 	if (!readerPointer)
-		return SOFIA_INVALID;
-	readerPointer->content = (sofia_string)malloc(size);
+		return NL_INVALID;
+	readerPointer->content = (nl_string)malloc(size);
 	/* TO_DO: Defensive programming */
 	/* TO_DO: Initialize the histogram */
 	/* TO_DO: Initialize errors */
@@ -125,14 +125,14 @@ BufferPointer readerCreate(sofia_intg size, sofia_intg increment, sofia_char mod
 *************************************************************
 */
 
-BufferPointer readerAddChar(BufferPointer readerPointer, sofia_char ch) {
-	sofia_string tempReader = SOFIA_INVALID;
-	sofia_intg newSize = 0;
-	sofia_char tempChar = ' ';
+BufferPointer readerAddChar(BufferPointer readerPointer, nl_char ch) {
+	nl_string tempReader = NL_INVALID;
+	nl_int newSize = 0;
+	nl_char tempChar = ' ';
 	/* TO_DO: Defensive programming */
 	/* TO_DO: Reset Realocation */
 	/* TO_DO: Test the inclusion of chars */
-	if (readerPointer->positions.wrte * (sofia_intg)sizeof(sofia_char) < readerPointer->size) {
+	if (readerPointer->positions.wrte * (nl_int)sizeof(nl_char) < readerPointer->size) {
 		/* TO_DO: This buffer is NOT full */
 	}
 	else {
@@ -150,7 +150,7 @@ BufferPointer readerAddChar(BufferPointer readerPointer, sofia_char ch) {
 			/* TO_DO: Defensive programming */
 			break;
 		default:
-			return SOFIA_INVALID;
+			return NL_INVALID;
 		}
 		/* TO_DO: Reallocate */
 		/* TO_DO: Defensive programming */
@@ -176,7 +176,7 @@ BufferPointer readerAddChar(BufferPointer readerPointer, sofia_char ch) {
 *	- Adjust for your LANGUAGE.
 *************************************************************
 */
-sofia_boln readerClear(BufferPointer const readerPointer) {
+nl_boln readerClear(BufferPointer const readerPointer) {
 	/* TO_DO: Defensive programming */
 	/* TO_DO: Adjust the write, mark and read to zero */
 	/* TO_DO: Adjust flags */
@@ -197,7 +197,7 @@ sofia_boln readerClear(BufferPointer const readerPointer) {
 *	- Adjust for your LANGUAGE.
 *************************************************************
 */
-sofia_boln readerFree(BufferPointer const readerPointer) {
+nl_boln readerFree(BufferPointer const readerPointer) {
 	/* TO_DO: Defensive programming */
 	/* TO_DO: Free pointers */
 	return NL_TRUE;
@@ -217,7 +217,7 @@ sofia_boln readerFree(BufferPointer const readerPointer) {
 *	- Adjust for your LANGUAGE.
 *************************************************************
 */
-sofia_boln readerIsFull(BufferPointer const readerPointer) {
+nl_boln readerIsFull(BufferPointer const readerPointer) {
 	/* TO_DO: Defensive programming */
 	/* TO_DO: Check flag if buffer is FUL */
 	return 0;
@@ -238,7 +238,7 @@ sofia_boln readerIsFull(BufferPointer const readerPointer) {
 *	- Adjust for your LANGUAGE.
 *************************************************************
 */
-sofia_boln readerIsEmpty(BufferPointer const readerPointer) {
+nl_boln readerIsEmpty(BufferPointer const readerPointer) {
 	/* TO_DO: Defensive programming */
 	/* TO_DO: Check flag if buffer is EMP */
 	return 0;
@@ -259,7 +259,7 @@ sofia_boln readerIsEmpty(BufferPointer const readerPointer) {
 *	- Adjust for your LANGUAGE.
 *************************************************************
 */
-sofia_boln readerSetMark(BufferPointer const readerPointer, sofia_intg mark) {
+nl_boln readerSetMark(BufferPointer const readerPointer, nl_int mark) {
 	/* TO_DO: Defensive programming */
 	/* TO_DO: Adjust mark */
 	return NL_TRUE;
@@ -280,9 +280,9 @@ sofia_boln readerSetMark(BufferPointer const readerPointer, sofia_intg mark) {
 *	- Adjust for your LANGUAGE.
 *************************************************************
 */
-sofia_intg readerPrint(BufferPointer const readerPointer) {
-	sofia_intg cont = 0;
-	sofia_char c;
+nl_int readerPrint(BufferPointer const readerPointer) {
+	nl_int cont = 0;
+	nl_char c;
 	/* TO_DO: Defensive programming (including invalid chars) */
 	c = readerGetChar(readerPointer);
 	while (cont < readerPointer->positions.wrte) {
@@ -309,12 +309,12 @@ sofia_intg readerPrint(BufferPointer const readerPointer) {
 *	- Adjust for your LANGUAGE.
 *************************************************************
 */
-sofia_intg readerLoad(BufferPointer readerPointer, FILE* const fileDescriptor) {
-	sofia_intg size = 0;
-	sofia_char c;
+nl_int readerLoad(BufferPointer readerPointer, FILE* const fileDescriptor) {
+	nl_int size = 0;
+	nl_char c;
 	/* TO_DO: Defensive programming */
 	while (!feof(fileDescriptor)) {
-		c = (sofia_char)fgetc(fileDescriptor);
+		c = (nl_char)fgetc(fileDescriptor);
 		readerPointer = readerAddChar(readerPointer, c);
 		size++;
 	}
@@ -336,7 +336,7 @@ sofia_intg readerLoad(BufferPointer readerPointer, FILE* const fileDescriptor) {
 *	- Adjust for your LANGUAGE.
 *************************************************************
 */
-sofia_boln readerRecover(BufferPointer const readerPointer) {
+nl_boln readerRecover(BufferPointer const readerPointer) {
 	/* TO_DO: Defensive programming */
 	/* TO_DO: Recover positions: read and mark must be zero */
 	/* TO_DO: Update flags */
@@ -358,7 +358,7 @@ sofia_boln readerRecover(BufferPointer const readerPointer) {
 *	- Adjust for your LANGUAGE.
 *************************************************************
 */
-sofia_boln readerRetract(BufferPointer const readerPointer) {
+nl_boln readerRetract(BufferPointer const readerPointer) {
 	/* TO_DO: Defensive programming */
 	/* TO_DO: Retract (return 1 pos read) */
 	return NL_TRUE;
@@ -379,7 +379,7 @@ sofia_boln readerRetract(BufferPointer const readerPointer) {
 *	- Adjust for your LANGUAGE.
 *************************************************************
 */
-sofia_boln readerRestore(BufferPointer const readerPointer) {
+nl_boln readerRestore(BufferPointer const readerPointer) {
 	/* TO_DO: Defensive programming */
 	/* TO_DO: Restore positions (read to mark) */
 	return NL_TRUE;
@@ -401,7 +401,7 @@ sofia_boln readerRestore(BufferPointer const readerPointer) {
 *	- Adjust for your LANGUAGE.
 *************************************************************
 */
-sofia_char readerGetChar(BufferPointer const readerPointer) {
+nl_char readerGetChar(BufferPointer const readerPointer) {
 	/* TO_DO: Defensive programming */
 	/* TO_DO: Check condition to read/wrte */
 	return readerPointer->content[readerPointer->positions.read++];
@@ -423,7 +423,7 @@ sofia_char readerGetChar(BufferPointer const readerPointer) {
 *	- Adjust for your LANGUAGE.
 *************************************************************
 */
-sofia_string readerGetContent(BufferPointer const readerPointer, sofia_intg pos) {
+nl_string readerGetContent(BufferPointer const readerPointer, nl_int pos) {
 	/* TO_DO: Defensive programming */
 	return readerPointer->content + pos;
 }
@@ -444,7 +444,7 @@ sofia_string readerGetContent(BufferPointer const readerPointer, sofia_intg pos)
 *	- Adjust for your LANGUAGE.
 *************************************************************
 */
-sofia_intg readerGetPosRead(BufferPointer const readerPointer) {
+nl_int readerGetPosRead(BufferPointer const readerPointer) {
 	/* TO_DO: Defensive programming */
 	/* TO_DO: Return read */
 	return 0;
@@ -465,7 +465,7 @@ sofia_intg readerGetPosRead(BufferPointer const readerPointer) {
 *	- Adjust for your LANGUAGE.
 *************************************************************
 */
-sofia_intg readerGetPosWrte(BufferPointer const readerPointer) {
+nl_int readerGetPosWrte(BufferPointer const readerPointer) {
 	/* TO_DO: Defensive programming */
 	/* TO_DO: Return wrte */
 	return 0;
@@ -486,7 +486,7 @@ sofia_intg readerGetPosWrte(BufferPointer const readerPointer) {
 *	- Adjust for your LANGUAGE.
 *************************************************************
 */
-sofia_intg readerGetPosMark(BufferPointer const readerPointer) {
+nl_int readerGetPosMark(BufferPointer const readerPointer) {
 	/* TO_DO: Defensive programming */
 	/* TO_DO: Return mark */
 	return 0;
@@ -507,7 +507,7 @@ sofia_intg readerGetPosMark(BufferPointer const readerPointer) {
 *	- Adjust for your LANGUAGE.
 *************************************************************
 */
-sofia_intg readerGetSize(BufferPointer const readerPointer) {
+nl_int readerGetSize(BufferPointer const readerPointer) {
 	/* TO_DO: Defensive programming */
 	/* TO_DO: Return size */
 	return 0;
@@ -527,7 +527,7 @@ sofia_intg readerGetSize(BufferPointer const readerPointer) {
 *	- Adjust for your LANGUAGE.
 *************************************************************
 */
-sofia_intg readerGetInc(BufferPointer const readerPointer) {
+nl_int readerGetInc(BufferPointer const readerPointer) {
 	/* TO_DO: Defensive programming */
 	/* TO_DO: Return increment */
 	return 0;
@@ -547,7 +547,7 @@ sofia_intg readerGetInc(BufferPointer const readerPointer) {
 *	- Adjust for your LANGUAGE.
 *************************************************************
 */
-sofia_char readerGetMode(BufferPointer const readerPointer) {
+nl_char readerGetMode(BufferPointer const readerPointer) {
 	/* TO_DO: Defensive programming */
 	/* TO_DO: Return mode */
 	return '\0';
@@ -565,7 +565,7 @@ sofia_char readerGetMode(BufferPointer const readerPointer) {
 *	- Adjust for your LANGUAGE.
 *************************************************************
 */
-sofia_void readerPrintStat(BufferPointer const readerPointer) {
+nl_void readerPrintStat(BufferPointer const readerPointer) {
 	/* TO_DO: Defensive programming */
 	/* TO_DO: Updates the histogram */
 }
@@ -583,7 +583,7 @@ sofia_void readerPrintStat(BufferPointer const readerPointer) {
 *	- Adjust for your LANGUAGE.
 *************************************************************
 */
-sofia_intg readerGetNumErrors(BufferPointer const readerPointer) {
+nl_int readerGetNumErrors(BufferPointer const readerPointer) {
 	/* TO_DO: Defensive programming */
 	/* TO_DO: Returns the number of errors */
 	return 0;
@@ -604,7 +604,7 @@ sofia_intg readerGetNumErrors(BufferPointer const readerPointer) {
 *************************************************************
 */
 
-sofia_void readerCalcChecksum(BufferPointer readerPointer) {
+nl_void readerCalcChecksum(BufferPointer readerPointer) {
 	/* TO_DO: Defensive programming */
 	/* TO_DO: Calculate checksum */
 }
@@ -624,7 +624,7 @@ sofia_void readerCalcChecksum(BufferPointer readerPointer) {
 *************************************************************
 */
 
-sofia_boln readerPrintFlags(BufferPointer readerPointer) {
+nl_boln readerPrintFlags(BufferPointer readerPointer) {
 	/* TO_DO: Defensive programming */
 	/* TO_DO: Shows flags */
 	return NL_TRUE;

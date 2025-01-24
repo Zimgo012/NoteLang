@@ -75,8 +75,8 @@
 *************************************************************
 */
 
-sofia_intg main(int argc, char** argv) {
-	sofia_intg i;
+nl_int main(int argc, char** argv) {
+	nl_int i;
 	printLogo();
 	if (DEBUG) {
 		for (i = 0; i < argc; ++i)
@@ -89,7 +89,7 @@ sofia_intg main(int argc, char** argv) {
 			PGM_PARSER, "] - Parser\n");
 		return EXIT_FAILURE;
 	}
-	sofia_char option = argv[1][0];
+	nl_char option = argv[1][0];
 	switch (option) {
 	case PGM_READER:
 		printf("%s%c%s", "\n[Option '", PGM_READER, "': Starting READER .....]\n\n");
@@ -131,7 +131,7 @@ sofia_intg main(int argc, char** argv) {
 
 /* TO_DO: Update your logo with your own language message */
 
-sofia_void printLogo() {
+nl_void printLogo() {
 	printf("%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
 		"\t=---------------------------------------=\n",
 		"\t|  COMPILERS - ALGONQUIN COLLEGE (F24)  |\n",

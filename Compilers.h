@@ -2,7 +2,7 @@
 ************************************************************
 * COMPILERS COURSE - Algonquin College
 * Code version: Fall, 2024
-* Author: TO_DO
+* Author: John Rycca Belcina
 * Professors: Paulo Sousa
 ************************************************************
 #
@@ -65,10 +65,10 @@
 
 /* TO_DO: Logical constants - adapt for your language */
 #define NL_TRUE		1
-#define SOFIA_FALSE		0
-#define SOFIA_ERROR		(-1)	/* General error message */
+#define NL_FALSE		0
+#define NL_ERROR		(-1)	/* General error message */
 
-#define SOFIA_INVALID	NULL
+#define NL_INVALID	NULL
 
 /*
 ------------------------------------------------------------
@@ -80,17 +80,17 @@ NOTE: Some types may not be directly used by your language,
 
 
 /* TO_DO: Define your typedefs */
-typedef char			sofia_char;
-typedef char*			sofia_string;
-typedef int				sofia_intg;
-typedef float			sofia_real;
-typedef void			sofia_void;
+typedef char			nl_char;
+typedef char*			nl_string;
+typedef int				nl_int;
+typedef float			nl_float;
+typedef void			nl_void;
 
-typedef char			sofia_boln;
-typedef unsigned char	sofia_byte;
+typedef char			nl_boln;
+typedef unsigned char	nl_byte;
 
-typedef long			sofia_long;
-typedef double			sofia_doub;
+typedef long			nl_long;
+typedef double			nl_double;
 
 /*
 ------------------------------------------------------------
@@ -112,13 +112,13 @@ Main functions signatures
 (Code will be updated during next assignments)
 ------------------------------------------------------------
 */
-sofia_intg mainReader(sofia_intg argc, sofia_string* argv);
+nl_int mainReader(nl_int argc, nl_string* argv);
 /* TO_DO: Remove comment in next assignments */
 /*
 sofia_intg mainScanner(sofia_intg argc, sofia_string* argv);
 sofia_intg mainParser(sofia_intg argc, sofia_string* argv);
 */
 
-sofia_void printLogo();
+nl_void printLogo();
 
 #endif

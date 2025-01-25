@@ -87,23 +87,39 @@ BufferPointer readerCreate(nl_int size, nl_int increment, nl_char mode) {
 	BufferPointer readerPointer;
 	nl_int count = 0;
 	/* TO_DO: Defensive programming */
+	if (size < 0)
+		size = READER_DEFAULT_SIZE;
 	if (!size)
 		size = READER_DEFAULT_SIZE;
+		increment = READER_DEFAULT_INCREMENT;
+	if (increment < 0)
+		mode  = MODE_FIXED;
 	if (!increment)
 		increment = READER_DEFAULT_INCREMENT;
 	if (!mode)
-		mode = MODE_FIXED;
+		return NL_ERROR;
 	readerPointer = (BufferPointer)calloc(1, sizeof(Buffer));
 	if (!readerPointer)
-		return NL_INVALID;
+		return NL_ERROR;
 	readerPointer->content = (nl_string)malloc(size);
+
 	/* TO_DO: Defensive programming */
+
 	/* TO_DO: Initialize the histogram */
+	for (int i = 0; i < NCHAR; i++)
+		readerPointer->histogram[i] = 0;
 	/* TO_DO: Initialize errors */
+	readerPointer->numReaderErrors = 0;
 	readerPointer->mode = mode;
 	readerPointer->size = size;
 	readerPointer->increment = increment;
+
 	/* TO_DO: Initialize flags */
+	readerPointer->flags.isEmpty = NL_TRUE;
+	readerPointer->flags.isFull =  NL_FALSE;
+	readerPointer->flags.isEmpty = NL_FALSE;
+	readerPointer->flags.isEmpty = NL_FALSE;
+
 	/* TO_DO: Default checksum */
 	return readerPointer;
 }
@@ -130,8 +146,11 @@ BufferPointer readerAddChar(BufferPointer readerPointer, nl_char ch) {
 	nl_int newSize = 0;
 	nl_char tempChar = ' ';
 	/* TO_DO: Defensive programming */
+		
 	/* TO_DO: Reset Realocation */
+
 	/* TO_DO: Test the inclusion of chars */
+
 	if (readerPointer->positions.wrte * (nl_int)sizeof(nl_char) < readerPointer->size) {
 		/* TO_DO: This buffer is NOT full */
 	}
@@ -199,7 +218,10 @@ nl_boln readerClear(BufferPointer const readerPointer) {
 */
 nl_boln readerFree(BufferPointer const readerPointer) {
 	/* TO_DO: Defensive programming */
+	if (!readerPointer)
+		return NL_ERROR;
 	/* TO_DO: Free pointers */
+	free(readerPointer);
 	return NL_TRUE;
 }
 

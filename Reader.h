@@ -119,7 +119,7 @@ typedef struct bufferReader {
 	Position		positions;			/* Offset / position field */
 	nl_int		histogram[NCHAR];	/* Statistics of chars */
 	nl_int		numReaderErrors;	/* Number of errors from Reader */
-	nl_byte		checksum;
+	nl_byte		checksum;			
 } Buffer, * BufferPointer;
 
 /* FUNCTIONS DECLARATION:  .................................. */

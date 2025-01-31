@@ -91,7 +91,8 @@ BufferPointer readerCreate(nl_int size, nl_int increment, nl_char mode) {
 		size = READER_DEFAULT_SIZE;
 	if (!size)
 		size = READER_DEFAULT_SIZE;
-		increment = READER_DEFAULT_INCREMENT;
+		//increment = READER_DEFAULT_INCREMENT;
+
 	if (increment < 0)
 		mode  = MODE_FIXED;
 	if (!increment)
@@ -104,7 +105,8 @@ BufferPointer readerCreate(nl_int size, nl_int increment, nl_char mode) {
 	readerPointer->content = (nl_string)malloc(size);
 
 	/* TO_DO: Defensive programming */
-
+	if (!readerPointer->content)
+		return NL_ERROR;
 	/* TO_DO: Initialize the histogram */
 	for (int i = 0; i < NCHAR; i++)
 		readerPointer->histogram[i] = 0;
@@ -121,6 +123,7 @@ BufferPointer readerCreate(nl_int size, nl_int increment, nl_char mode) {
 	readerPointer->flags.isEmpty = NL_FALSE;
 
 	/* TO_DO: Default checksum */
+	readerPointer->checksum = 0; // check this again
 	return readerPointer;
 }
 
@@ -146,38 +149,54 @@ BufferPointer readerAddChar(BufferPointer readerPointer, nl_char ch) {
 	nl_int newSize = 0;
 	nl_char tempChar = ' ';
 	/* TO_DO: Defensive programming */
-		
+	if (!readerPointer)
+		return NL_INVALID;
 	/* TO_DO: Reset Realocation */
-
 	/* TO_DO: Test the inclusion of chars */
-
 	if (readerPointer->positions.wrte * (nl_int)sizeof(nl_char) < readerPointer->size) {
 		/* TO_DO: This buffer is NOT full */
+		readerPointer->flags.isFull = NL_FALSE;
+
 	}
 	else {
 		/* TO_DO: Reset Full flag */
+		readerPointer->flags.isFull = NL_TRUE;
 		switch (readerPointer->mode) {
 		case MODE_FIXED:
 			/* TO_DO: Update the last position with Terminator */
+			return NL_INVALID;
 			break;
 		case MODE_ADDIT:
 			/* TO_DO: Update size for Additive mode */
+			newSize = readerPointer->size + readerPointer->increment;
 			/* TO_DO: Defensive programming */
+			if(newSize > readerPointer->size)
 			break;
 		case MODE_MULTI:
 			/* TO_DO: Update size for Additive mode */
+			newSize = readerPointer->size * readerPointer->increment;
 			/* TO_DO: Defensive programming */
+			if (newSize > readerPointer->size)
+				return NL_INVALID;
 			break;
 		default:
 			return NL_INVALID;
 		}
 		/* TO_DO: Reallocate */
+		tempReader = realloc(readerPointer->content, newSize);
 		/* TO_DO: Defensive programming */
+		if (!tempReader)
+			return NL_INVALID;
+
+		readerPointer->content = tempReader;
+		readerPointer->size = readerPointer->content;
+		readerPointer->flags.isFull = NL_FALSE;
 		return readerPointer;
 	}
 	/* TO_DO: Update the flags */
 	readerPointer->content[readerPointer->positions.wrte++] = ch;
 	/* TO_DO: Updates histogram */
+	readerPointer->histogram[ch] += 1;
 	return readerPointer;
 }
 
@@ -197,8 +216,17 @@ BufferPointer readerAddChar(BufferPointer readerPointer, nl_char ch) {
 */
 nl_boln readerClear(BufferPointer const readerPointer) {
 	/* TO_DO: Defensive programming */
+	if (!readerPointer)
+		return NL_INVALID;
 	/* TO_DO: Adjust the write, mark and read to zero */
+	readerPointer->positions.wrte = 0;
+	readerPointer->positions.read = 0;
+	readerPointer->positions.mark = 0;
 	/* TO_DO: Adjust flags */
+	readerPointer->flags.isEmpty =	NL_TRUE;
+	readerPointer->flags.isFull =	NL_FALSE;
+	readerPointer->flags.isMoved =	NL_FALSE;
+	readerPointer->flags.isRead =	NL_FALSE; 
 	return NL_TRUE;
 }
 
@@ -222,6 +250,7 @@ nl_boln readerFree(BufferPointer const readerPointer) {
 		return NL_ERROR;
 	/* TO_DO: Free pointers */
 	free(readerPointer);
+
 	return NL_TRUE;
 }
 
@@ -241,8 +270,13 @@ nl_boln readerFree(BufferPointer const readerPointer) {
 */
 nl_boln readerIsFull(BufferPointer const readerPointer) {
 	/* TO_DO: Defensive programming */
+	if (!readerPointer)
+		return NL_ERROR;
 	/* TO_DO: Check flag if buffer is FUL */
-	return 0;
+	if (readerPointer->flags.isFull)
+		return NL_TRUE;
+	else
+		return NL_FALSE;
 }
 
 
@@ -262,8 +296,13 @@ nl_boln readerIsFull(BufferPointer const readerPointer) {
 */
 nl_boln readerIsEmpty(BufferPointer const readerPointer) {
 	/* TO_DO: Defensive programming */
+	if (!readerPointer)
+		return NL_ERROR;
 	/* TO_DO: Check flag if buffer is EMP */
-	return 0;
+	if (readerPointer->flags.isEmpty)
+		return NL_TRUE;
+	else
+		return NL_FALSE;
 }
 
 /*
@@ -283,7 +322,12 @@ nl_boln readerIsEmpty(BufferPointer const readerPointer) {
 */
 nl_boln readerSetMark(BufferPointer const readerPointer, nl_int mark) {
 	/* TO_DO: Defensive programming */
+	if (!readerPointer)
+		return NL_ERROR;
+	if (mark < 0 || mark > readerPointer->positions.wrte)
+		return NL_ERROR;
 	/* TO_DO: Adjust mark */
+	readerPointer->positions.mark = mark;
 	return NL_TRUE;
 }
 
@@ -335,6 +379,13 @@ nl_int readerLoad(BufferPointer readerPointer, FILE* const fileDescriptor) {
 	nl_int size = 0;
 	nl_char c;
 	/* TO_DO: Defensive programming */
+	if (!readerPointer)
+		return NL_ERROR;
+	if (!fileDescriptor)
+		return NL_ERROR;
+	// I need to put here certain situation in the future..
+	if (!readerPointer)
+		return NL_ERROR;
 	while (!feof(fileDescriptor)) {
 		c = (nl_char)fgetc(fileDescriptor);
 		readerPointer = readerAddChar(readerPointer, c);
@@ -360,7 +411,11 @@ nl_int readerLoad(BufferPointer readerPointer, FILE* const fileDescriptor) {
 */
 nl_boln readerRecover(BufferPointer const readerPointer) {
 	/* TO_DO: Defensive programming */
+	if (!readerPointer)
+		return NL_ERROR;
 	/* TO_DO: Recover positions: read and mark must be zero */
+	readerPointer->positions.read = 0;
+	readerPointer->positions.mark = 0;
 	/* TO_DO: Update flags */
 	return NL_TRUE;
 }
@@ -382,6 +437,8 @@ nl_boln readerRecover(BufferPointer const readerPointer) {
 */
 nl_boln readerRetract(BufferPointer const readerPointer) {
 	/* TO_DO: Defensive programming */
+	if (!readerPointer)
+		return NL_ERROR;
 	/* TO_DO: Retract (return 1 pos read) */
 	return NL_TRUE;
 }
@@ -403,7 +460,10 @@ nl_boln readerRetract(BufferPointer const readerPointer) {
 */
 nl_boln readerRestore(BufferPointer const readerPointer) {
 	/* TO_DO: Defensive programming */
+	if (!readerPointer)
+		return NL_ERROR;
 	/* TO_DO: Restore positions (read to mark) */
+	readerPointer->positions.read = readerPointer->positions.mark;
 	return NL_TRUE;
 }
 
@@ -425,7 +485,10 @@ nl_boln readerRestore(BufferPointer const readerPointer) {
 */
 nl_char readerGetChar(BufferPointer const readerPointer) {
 	/* TO_DO: Defensive programming */
+	if (!readerPointer)
+		return NL_ERROR;
 	/* TO_DO: Check condition to read/wrte */
+
 	return readerPointer->content[readerPointer->positions.read++];
 }
 
@@ -447,6 +510,10 @@ nl_char readerGetChar(BufferPointer const readerPointer) {
 */
 nl_string readerGetContent(BufferPointer const readerPointer, nl_int pos) {
 	/* TO_DO: Defensive programming */
+	if (!readerPointer)
+		return NL_ERROR;
+	if (pos < 0)
+		return NL_ERROR;
 	return readerPointer->content + pos;
 }
 
@@ -468,8 +535,10 @@ nl_string readerGetContent(BufferPointer const readerPointer, nl_int pos) {
 */
 nl_int readerGetPosRead(BufferPointer const readerPointer) {
 	/* TO_DO: Defensive programming */
+	if (!readerPointer)
+		return NL_ERROR;
 	/* TO_DO: Return read */
-	return 0;
+	return readerPointer->positions.read;
 }
 
 
@@ -489,8 +558,10 @@ nl_int readerGetPosRead(BufferPointer const readerPointer) {
 */
 nl_int readerGetPosWrte(BufferPointer const readerPointer) {
 	/* TO_DO: Defensive programming */
+	if (!readerPointer)
+		return NL_ERROR;
 	/* TO_DO: Return wrte */
-	return 0;
+	return readerPointer->positions.wrte;
 }
 
 
@@ -510,7 +581,10 @@ nl_int readerGetPosWrte(BufferPointer const readerPointer) {
 */
 nl_int readerGetPosMark(BufferPointer const readerPointer) {
 	/* TO_DO: Defensive programming */
+	if (!readerPointer)
+		return NL_ERROR;
 	/* TO_DO: Return mark */
+	return readerPointer->positions.mark;
 	return 0;
 }
 
@@ -531,8 +605,10 @@ nl_int readerGetPosMark(BufferPointer const readerPointer) {
 */
 nl_int readerGetSize(BufferPointer const readerPointer) {
 	/* TO_DO: Defensive programming */
+	if (!readerPointer)
+		return NL_ERROR;
 	/* TO_DO: Return size */
-	return 0;
+	return readerPointer->size;
 }
 
 /*
@@ -551,8 +627,10 @@ nl_int readerGetSize(BufferPointer const readerPointer) {
 */
 nl_int readerGetInc(BufferPointer const readerPointer) {
 	/* TO_DO: Defensive programming */
+	if (!readerPointer)
+		return NL_ERROR;
 	/* TO_DO: Return increment */
-	return 0;
+	return readerPointer->increment;
 }
 
 /*
@@ -571,8 +649,10 @@ nl_int readerGetInc(BufferPointer const readerPointer) {
 */
 nl_char readerGetMode(BufferPointer const readerPointer) {
 	/* TO_DO: Defensive programming */
+	if (!readerPointer)
+		return NL_ERROR;
 	/* TO_DO: Return mode */
-	return '\0';
+	return readerPointer->mode;
 }
 
 /*
@@ -589,7 +669,20 @@ nl_char readerGetMode(BufferPointer const readerPointer) {
 */
 nl_void readerPrintStat(BufferPointer const readerPointer) {
 	/* TO_DO: Defensive programming */
-	/* TO_DO: Updates the histogram */
+	if (!readerPointer)
+		return NL_ERROR;
+	/* TO_DO: Updates the histogram */ 
+	for (int i = 0; i < NCHAR; i++) {
+		if (i == ' ') 
+			continue;
+		
+		if (!isprint(i))
+			continue;
+
+		if (readerPointer->histogram[i] != 0)
+			printf("[%c]= %d ", i, readerPointer->histogram[i]);
+	}
+	printf("\n");
 }
 
 /*
@@ -607,8 +700,10 @@ nl_void readerPrintStat(BufferPointer const readerPointer) {
 */
 nl_int readerGetNumErrors(BufferPointer const readerPointer) {
 	/* TO_DO: Defensive programming */
+	if (!readerPointer)
+		return NL_ERROR;
 	/* TO_DO: Returns the number of errors */
-	return 0;
+	return readerPointer->numReaderErrors;
 }
 
 /*
@@ -628,6 +723,8 @@ nl_int readerGetNumErrors(BufferPointer const readerPointer) {
 
 nl_void readerCalcChecksum(BufferPointer readerPointer) {
 	/* TO_DO: Defensive programming */
+	if (!readerPointer)
+		return NL_ERROR;
 	/* TO_DO: Calculate checksum */
 }
 
@@ -648,6 +745,14 @@ nl_void readerCalcChecksum(BufferPointer readerPointer) {
 
 nl_boln readerPrintFlags(BufferPointer readerPointer) {
 	/* TO_DO: Defensive programming */
+	if (!readerPointer)
+		return NL_ERROR;
 	/* TO_DO: Shows flags */
+	printf("| EMPTY Flag = %x|\n", readerPointer->flags.isEmpty);
+	printf("| FULL Flag =  %x|\n", readerPointer->flags.isFull);
+	printf("| READ Flag =  %x|\n", readerPointer->flags.isRead);
+	printf("| MOVED Flag = %x|\n", readerPointer->flags.isMoved);
+	
 	return NL_TRUE;
 }
+

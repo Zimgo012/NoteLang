@@ -188,6 +188,8 @@ nl_void startReader(nl_string program, nl_string input, nl_char mode, nl_int siz
 		exit(1);
 	}
 
+	//TO_DO handle files that are not '.note' in the future
+
 	/* Load source file into input buffer  */
 	printf("Reading file %s ....Please wait\n", input);
 	loadSize = readerLoad(bufferp, fileHandler);

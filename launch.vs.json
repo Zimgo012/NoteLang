@@ -9,7 +9,7 @@
       "name": "NoteLang.exe",
       "args": [
         "1",
-        "INPUT6_Big.txt",
+        "INPUT1_Hello.note",
         "m",
         "400",
         "20"

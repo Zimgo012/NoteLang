@@ -4,7 +4,7 @@
 :: ---------------------------------------------------------------------
 
 CLS
-SET COMPILER=Compilers.exe
+SET COMPILER=Notelang.exe
 
 SET FILE1=INPUT0_Empty
 SET FILE2=INPUT1_Hello
@@ -15,7 +15,7 @@ SET FILE6=INPUT5_General
 SET FILE7=INPUT6_Big
 
 SET ASSIGNMENT=A12
-SET EXTENSION=sof
+SET EXTENSION=note
 SET OUTPUT=out
 SET ERROR=err
 
@@ -32,19 +32,19 @@ ECHO "|  COMPILERS - ALGONQUIN COLLEGE (F24)  |"
 ECHO "=---------------------------------------="
 ECHO "    @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@    ”
 ECHO "    @@                             @@    ”
-ECHO "    @@           %&@@@@@@@@@@@     @@    ”
-ECHO "    @@       @%% (@@@@@@@@@  @     @@    ”
-ECHO "    @@      @& @   @ @       @     @@    ”
-ECHO "    @@     @ @ %  / /   @@@@@@     @@    ”
-ECHO "    @@      & @ @  @@              @@    ”
-ECHO "    @@       @/ @*@ @ @   @        @@    ”
-ECHO "    @@           @@@@  @@ @ @      @@    ”
-ECHO "    @@            /@@    @@@ @     @@    ”
-ECHO "    @@     @      / /     @@ @     @@    ”
-ECHO "    @@     @ @@   /@/   @@@ @      @@    ”
-ECHO "    @@     @@@@@@@@@@@@@@@         @@    ”
+ECHO "    @@    __    __  __             @@    ”
+ECHO "    @@    |  `  |  `|  `           @@    ”
+ECHO "    @@    | $$` | $$| $$           @@    ”
+ECHO "    @@    | $$$`| $$| $$           @@    ”
+ECHO "    @@    | $$$$` $$| $$           @@    ”
+ECHO "    @@    | $$`$$ $$| $$           @@    ”
+ECHO "    @@    | $$ `$$$$| $$           @@    ”
+ECHO "    @@    | $$ `$$$$| $$_______    @@    ”
+ECHO "    @@    | $$  `$$$| $$_______`   @@    ”
+ECHO "    @@     `$$   `$$ `$$$$$$$$$$`  @@     ”
 ECHO "    @@                             @@    ”
-ECHO "    @@         S O F I A           @@    ”
+ECHO "    @@       N O T E L A N G       @@     ”
+ECHO "    @@                             @@    ”
 ECHO "    @@                             @@    ”
 ECHO "    @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@    ”
 ECHO "                                         "

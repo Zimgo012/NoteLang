@@ -74,80 +74,100 @@
 /* TO_DO: Define Token codes - Create your token classes */
 enum TOKENS {
 	ERR_T,			/*  0: Error token */
-	MNID_T,			/*  1: Method name identifier token (start: section) */
-	VAR_T,			/*  2: Variable declaration (df) */
-	INL_T,			/*  3: Integer literal token */
-	STR_T,			/*  4: String literal token */
-	LPR_T,			/*  5: Left parenthesis token ( ( ) */
-	RPR_T,			/*  6: Right parenthesis token ( ) ) */
-	LBR_T,			/*  7: Left brace token ( { ) */
-	RBR_T,			/*  8: Right brace token ( } ) */
-	KW_T,			/*  9: Keyword token */
-	EOS_T,			/* 10: End of statement (semicolon ;) */
-	ASSIGN_T,		/* 11: Assignment operator (=) */
-	OP_NOTE_T,		/* 12: Note Operator (->) */
-	OP_ADD_T,		/* 13: Addition Operator (+) */
-	OP_SUB_T,		/* 14: Subtraction Operator (-) */
-	OP_MUL_T,		/* 15: Multiplication Operator (*) */
-	OP_DIV_T,		/* 16: Division Operator (/) */
-	OP_LBRACKET_T,	/* 17: Left bracket token ( [ ) */
-	OP_RBRACKET_T,	/* 18: Right bracket token ( ] ) */
-	OP_NOT_T,		/* 19: Exclamation mark ( ! ) */
+	VID_T,			/*  1: Variable/method/note identifier (e.g., introPart, secondPart, C4) */
+	INL_T,			/*  2: Integer literal token (e.g., 4) */
+	STR_T,			/*  3: String literal token (e.g., "Water Melon") */
+	LPR_T,			/*  4: Left parenthesis token ( ( ) */
+	RPR_T,			/*  5: Right parenthesis token ( ) ) */
+	LBR_T,			/*  6: Left brace token ( { ) */
+	RBR_T,			/*  7: Right brace token ( } ) */
+	KW_T,			/*  8: Keyword token (e.g., df, section, Print) */
+	EOS_T,			/*  9: End of statement (semicolon ;) */
+	ASSIGN_T,		/* 10: Assignment operator (=) */
+	OP_NOTE_T,		/* 11: Note operator (->) */
+	OP_ADD_T,		/* 12: Addition operator (+) */
+	OP_SUB_T,		/* 13: Subtraction operator (-) */
+	OP_MUL_T,		/* 14: Multiplication operator (*) */
+	OP_DIV_T,		/* 15: Division operator (/) */
+	OP_LBRACKET_T,	/* 16: Left bracket token ( [ ) */
+	OP_RBRACKET_T,	/* 17: Right bracket token ( ] ) */
+	OP_EQ_T,		/* 18: Equality operator (==) */
+	OP_NE_T,		/* 19: Not equal operator (!=) */
 	OP_LT_T,		/* 20: Less-than operator (<) */
 	OP_GT_T,		/* 21: Greater-than operator (>) */
 	OP_COMMA_T,		/* 22: Comma ( , ) */
-	CMT_T,			/* 23: Comment token (/* ... /) */ 
+	CMT_T,			/* 23: Comment token (/** ... **/ 
 	SEOF_T			/* 24: Source end-of-file token */
 };
 
 /* TO_DO: Define the list of keywords */
 static nl_string tokenStrTable[NUM_TOKENS] = {
 	"ERR_T",         /*  0: Error token */
-	"MNID_T",        /*  1: Method name identifier token (section) */
-	"VAR_T",         /*  2: Variable declaration (df) */
-	"INL_T",         /*  3: Integer literal token */
-	"STR_T",         /*  4: String literal token */
-	"LPR_T",         /*  5: Left parenthesis token ( ( ) */
-	"RPR_T",         /*  6: Right parenthesis token ( ) ) */
-	"LBR_T",         /*  7: Left brace token ( { ) */
-	"RBR_T",         /*  8: Right brace token ( } ) */
-	"KW_T",          /*  9: Keyword token */
-	"EOS_T",         /* 10: End of statement (semicolon ;) */
-	"ASSIGN_T",      /* 11: Assignment operator (=) */
-	"OP_NOTE_T",     /* 12: Note Operator (->) */
-	"OP_ADD_T",      /* 13: Addition Operator (+) */
-	"OP_SUB_T",      /* 14: Subtraction Operator (-) */
-	"OP_MUL_T",      /* 15: Multiplication Operator (*) */
-	"OP_DIV_T",      /* 16: Division Operator (/) */
-	"OP_LBRACKET_T", /* 17: Left bracket token ( [ ) */
-	"OP_RBRACKET_T", /* 18: Right bracket token ( ] ) */
-	"OP_NOT_T",      /* 19: Exclamation mark ( ! ) */
+	"VID_T",         /*  1: Variable/method/note identifier (e.g., introPart, secondPart, C4) */
+	"INL_T",         /*  2: Integer literal token (e.g., 4) */
+	"STR_T",         /*  3: String literal token (e.g., "Water Melon") */
+	"LPR_T",         /*  4: Left parenthesis token ( ( ) */
+	"RPR_T",         /*  5: Right parenthesis token ( ) ) */
+	"LBR_T",         /*  6: Left brace token ( { ) */
+	"RBR_T",         /*  7: Right brace token ( } ) */
+	"KW_T",          /*  8: Keyword token (e.g., df, section, Print) */
+	"EOS_T",         /*  9: End of statement (semicolon ;) */
+	"ASSIGN_T",      /* 10: Assignment operator (=) */
+	"OP_NOTE_T",     /* 11: Note operator (->) */
+	"OP_ADD_T",      /* 12: Addition operator (+) */
+	"OP_SUB_T",      /* 13: Subtraction operator (-) */
+	"OP_MUL_T",      /* 14: Multiplication operator (*) */
+	"OP_DIV_T",      /* 15: Division operator (/) */
+	"OP_LBRACKET_T", /* 16: Left bracket token ( [ ) */
+	"OP_RBRACKET_T", /* 17: Right bracket token ( ] ) */
+	"OP_EQ_T",       /* 18: Equality operator (==) */
+	"OP_NE_T",       /* 19: Not equal operator (!=) */
 	"OP_LT_T",       /* 20: Less-than operator (<) */
 	"OP_GT_T",       /* 21: Greater-than operator (>) */
 	"OP_COMMA_T",    /* 22: Comma ( , ) */
-	"CMT_T",         /* 23: Comment token (/* ... */
+	"CMT_T",         /* 23: Comment token (/** ... **)* /
 	"SEOF_T"         /* 24: Source end-of-file token */
 };
 
 /* TO_DO: Operators token attributes */
-typedef enum ArithmeticOperators { OP_ADD, OP_SUB, OP_MUL, OP_DIV } AriOperator;
-typedef enum RelationalOperators { OP_EQ, OP_NE, OP_GT, OP_LT } RelOperator;
-typedef enum LogicalOperators { OP_AND, OP_OR, OP_NOT } LogOperator;
-typedef enum SourceEndOfFile { SEOF_0, SEOF_255 } EofOperator;
+typedef enum ArithmeticOperators {
+	OP_ADD,     /* + */
+	OP_SUB,     /* - */
+	OP_MUL,     /* * */
+	OP_DIV      /* / */
+} AriOperator;
+
+typedef enum RelationalOperators {
+	OP_EQ,      /* == */
+	OP_NE,      /* != */
+	OP_GT,      /* > */
+	OP_LT,      /* < */
+	OP_LE,      /* <= (added for Notelang conditionals) */
+	OP_GE       /* >= (added for Notelang conditionals) */
+} RelOperator;
+
+/* Logical operators not used in Notelang but retained for potential extension */
+typedef enum LogicalOperators {
+	OP_AND,     /* && */
+	OP_OR,      /* || */
+	OP_NOT      /* ! */
+} LogOperator;
+
+typedef enum SourceEndOfFile {
+	SEOF_0,     /* \0 */
+	SEOF_255    /* 0xFF */
+} EofOperator;
 
 /* TO_DO: Data structures for declaring the token and its attributes */
 typedef union TokenAttribute {
-	nl_int codeType;      /* integer attributes accessor */
-	AriOperator arithmeticOperator;		/* arithmetic operator attribute code */
-	RelOperator relationalOperator;		/* relational operator attribute code */
-	LogOperator logicalOperator;		/* logical operator attribute code */
-	EofOperator seofType;				/* source-end-of-file attribute code */
-	nl_int intValue;					/* integer literal attribute (value) */
-	nl_int keywordIndex;				/* keyword index in the keyword table */
-	nl_int contentString;				/* string literal offset from the beginning of the string literal buffer (stringLiteralTable->content) */
-	nl_float floatValue;				/* floating-point literal attribute (value) */
-	nl_char idLexeme[VID_LEN + 1];		/* variable identifier token attribute */
-	nl_char errLexeme[ERR_LEN + 1];		/* error token attribite */
+	AriOperator arithmeticOperator;    /* Arithmetic operator code (+, -, *, /) */
+	RelOperator relationalOperator;    /* Relational operator code (==, !=, >, <, <=, >=) */
+	EofOperator seofType;              /* Source end-of-file attribute code */
+	nl_int intValue;                   /* Integer literal value (e.g., 4) */
+	nl_int keywordIndex;               /* Keyword index in keywordTable (e.g., df -> 0) */
+	nl_int contentString;              /* String literal offset in string buffer */
+	nl_char idLexeme[VID_LEN + 1];     /* Identifier lexeme (e.g., introPart, C4) */
+	nl_char errLexeme[ERR_LEN + 1];    /* Error token lexeme */
 } TokenAttribute;
 
 /* TO_DO: Should be used if no symbol table is implemented */
@@ -205,70 +225,43 @@ typedef struct scannerData {
 
 
 /* TO_DO: Error states and illegal state */
-#define ESNR	8		/* Error state with no retract */
-#define ESWR	9		/* Error state with retract */
-#define FS		10		/* Illegal state */
+#define ER      100     /* Error state with retract (e.g., invalid start char) */
+#define ENR     200     /* Error state with no retract (e.g., mid-token error) */
+#define AS      300     /* Accepting state */
 
  /* TO_DO: State transition table definition */
-#define NUM_STATES		55
-#define CHAR_CLASSES	18
+#define NUM_STATES		102
+#define CHAR_CLASSES	23
 
 /* TO_DO: Transition table - type of states defined in separate table */
 static nl_int transitionTable[NUM_STATES][CHAR_CLASSES] = {
 
-	/*	[A-G],	[-],	[>],	{,		 [0-9],		',',	[mf-f],		},		[df],	[L],	[K],	[M],	[R],	[T],	[P],	[Q],	[W],	other	*/
-	{     1,	3,		ESNR,	ESNR,    ESNR,		ESNR,	ESWR,		ESWR,	21,		36,		38,		40,		42,		44,		46,		49,		ESNR,	ESNR	},	// S0: START
-	{     FS,   2,		FS,		FS,		 FS,		FS,		FS,			FS,		FS,		FS,		FS,		FS,		FS,		FS,		FS,		FS,		FS,		FS,		},	// S1: RECOGNIZING
-	{	  FS,   FS,		FS,		FS,		 FS,		FS,		FS,			FS,		FS,		FS,		FS,		FS,		FS,		FS,		FS,		FS,		FS,		FS,		},	// S2: ASNR (MVID)
-	{     FS,   FS,		FS,		3,		 FS,		FS,		FS,			FS,		FS,		FS,		FS,		FS,		FS,		FS,		FS,		FS,		FS,		FS,		},	// S3: ASWR (KEY)
-	{     FS,   FS,		FS,		FS,	     4,			FS,		FS,			FS,		FS,		FS,		FS,		FS,		FS,		FS,		FS,		FS,		FS,		FS,		},	// S4: NOAS
-	{     FS,   FS,		FS,		FS,		 FS,		5,		6,			FS,		FS,		FS,		FS,		FS,		FS,		FS,		FS,		FS,		FS,		FS,		},	// S5: ASNR (SL)
-	{     FS,   FS,     FS,		FS,		 FS,		FS,		6,			FS,		FS,		FS,		FS,		FS,		FS,		FS,		FS,		FS,		FS,		FS,		},	// S6: NOAS
-	{     FS,   FS,     FS,     FS,		 FS,		FS,		FS,			7,		FS,		FS,		FS,		FS,		FS,		FS,		FS,		FS,		FS,		FS,		},	// S7: ASNR (COM)
-	{     FS,   FS,		FS,		FS,		 FS,		FS,		FS,			FS,		FS,		FS,		FS,		FS,		FS,		FS,		FS,		FS,		FS,		FS,		},	// S8: ASNR (ES)
 
-	/* Variable df */
-	{     FS,   FS,		FS,		FS,		 FS,		FS,		FS,			22,		FS,		FS,		FS,		FS,		FS,		FS,		FS,		FS,		FS,		FS,		},	// S9: ASWR (ER)
-	{     FS,   FS,		FS,		FS,		 FS,		FS,		FS,			FS,		22,		FS,		FS,		FS,		FS,		FS,		FS,		FS,		FS,		FS,		},
-	{     FS,   FS,		FS,		FS,		 FS,		FS,		FS,			FS,		FS,		FS,		FS,		FS,		23,		FS,		FS,		FS,		FS,		FS,		},
-	{     FS,   FS,		FS,		FS,		 24,		FS,		FS,			FS,		FS,		FS,		FS,		FS,		FS,		FS,		FS,		FS,		FS,		FS,		},
-	{     FS,   FS,		FS,		FS,		 FS,		FS,		FS,			FS,		FS,		FS,		FS,		FS,		FS,		30,		FS,		FS,		FS,		FS,		},
-
-	/* Section, Function handling*/
-	{     FS,   FS,		FS,		FS,		 FS,		FS,		FS,			37,		FS,		FS,		FS,		FS,		FS,		FS,		FS,		FS,		FS,		FS,		},
-	{     FS,   FS,		FS,		FS,		 FS,		FS,		FS,			FS,		38,		FS,		FS,		FS,		FS,		FS,		FS,		FS,		FS,		FS,		},
-	{     FS,   FS,		FS,		FS,		 FS,		FS,		FS,			FS,		FS,		40,		FS,		FS,		FS,		FS,		FS,		FS,		FS,		FS,		},
-	{     FS,   FS,		FS,		FS,		 FS,		FS,		FS,			FS,		FS,		FS,		42,		FS,		FS,		FS,		FS,		FS,		FS,		FS,		},
-	{     FS,   FS,		FS,		FS,		 FS,		FS,		FS,			FS,		FS,		FS,		FS,		44,		FS,		FS,		FS,		FS,		FS,		FS,		},
-	{     FS,   FS,		FS,		FS,		 FS,		FS,		FS,			FS,		FS,		FS,		FS,		FS,		47,		FS,		FS,		FS,		FS,		FS,		},
-	{     FS,   FS,		FS,		FS,		 FS,		FS,		FS,			FS,		FS,		FS,		FS,		FS,		FS,		FS,		FS,		FS,		FS,		FS,		},
-
-	/*	Comments */
-	{     FS,   FS,		FS,		FS,		 FS,		FS,		FS,			FS,		FS,		FS,		FS,		FS,		FS,		FS,		50,		FS,		FS,		FS,		},
-	{     FS,   FS,		FS,		FS,		 FS,		FS,		FS,			FS,		FS,		FS,		FS,		FS,		FS,		FS,		51,		FS,		FS,		FS,		},
-	{     FS,   FS,		FS,		FS,		 FS,		FS,		FS,			FS,		FS,		FS,		FS,		FS,		FS,		FS,		52,		FS,		FS,		FS,		},
-	{     FS,   FS,		FS,		FS,		 FS,		FS,		FS,			FS,		FS,		FS,		FS,		FS,		FS,		FS,		54,		FS,		FS,		FS,		},
-	{     FS,   FS,		FS,		FS,		 FS,		FS,		FS,			FS,		FS,		FS,		FS,		FS,		FS,		FS,		FS,		FS,		FS,		FS,		},
 };
 
+
 /* Define accepting states types */
-#define NOFS	0		/* not accepting state */
-#define FSNR	1		/* accepting state with no retract */
-#define FSWR	2		/* accepting state with retract */
+#define NOFS	0		/* Not an accepting state */
+#define FSNR	1		/* Accepting state with no retract */
+#define FSWR	2		/* Accepting state with retract */
 
 /* TO_DO: Define list of acceptable states */
 static nl_int stateType[NUM_STATES] = {
-	NOFS, /* 00 */
-	NOFS, /* 01 */
-	FSNR, /* 02 (MID) - Methods */
-	FSWR, /* 03 (KEY) */
-	NOFS, /* 04 */
-	FSNR, /* 05 (SL) */
-	NOFS, /* 06 */
-	FSNR, /* 07 (COM) */
-	FSNR, /* 08 (Err1 - no retract) */
-	FSWR  /* 09 (Err2 - retract) */
+	NOFS, /* S00 - Start */
+	NOFS, /* S01 - Recognizing keywords */
+	FSNR, /* S02 - MID (Methods) */
+	FSWR, /* S03 - KEY */
+	NOFS, /* S04 */
+	FSNR, /* S05 - SL */
+	NOFS, /* S06 */
+	FSNR, /* S07 - COM (Comments) */
+	FSNR, /* S08 - Err1 (No retract) */
+	FSWR, /* S09 - Err2 (Retract) */
+	FSNR, /* S10 - Recognizing df */
+	NOFS, /* S11 */
+
 };
+
 
 /*
 -------------------------------------------------

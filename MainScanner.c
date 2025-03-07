@@ -168,8 +168,8 @@ nl_int mainScanner(nl_int argc, nl_string* argv) {
 	if ((loadSize != NL_ERROR) && (loadSize != 0)) {
 		if (readerAddChar(sourceBuffer, READER_TERMINATOR)) {
 			displayScanner(sourceBuffer);
-		}
-	}
+    }
+}
 
 	/* Create string Literal Table */
 	stringLiteralTable = readerCreate(READER_DEFAULT_SIZE, READER_DEFAULT_INCREMENT, MODE_ADDIT);
@@ -197,7 +197,7 @@ nl_int mainScanner(nl_int argc, nl_string* argv) {
 	printf("\nPrinting string table...\n");
 	printf("----------------------------------\n");
 	if (readerGetPosWrte(stringLiteralTable)) {
-		readerPrint(stringLiteralTable
+		readerPrint(stringLiteralTable);
 	}
 	printf("\n----------------------------------\n");
 	readerRestore(sourceBuffer); //xxx

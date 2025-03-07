@@ -1,0 +1,20 @@
+/** Test File for Notelang Scanner - Example Program **/
+
+/** Variable Declarations **/
+df x = 5;
+df message = "Hello Notelang";
+
+/** Function Definition **/
+section playMusic() {
+    C4 -> {1, ff};  /** Play note C4 with forte-fortissimo dynamics **/
+    df tempoValue = 120 + 10 - 2;
+    Print = message;
+}
+
+/** Conditional Loop **/
+<repeatif x < 10> {
+    x = x + 1;
+}
+
+/** End of Program **/
+!END;

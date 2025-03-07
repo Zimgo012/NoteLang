@@ -222,9 +222,9 @@ typedef struct scannerData {
 #define LETTER_CHR     'L'    /* CH20 - Letters [A-Za-z] (L) */
 #define NOTE_CHR       'N'    /* CH21 - Music notes [A-G] (RESERVED_NOTE) */
 #define OTHER_CHR      '^'    /* CH22 - Other characters (O) */
-#define SPC_CHR		   ' '
-#define TAB_CHR        '/t'
-
+#define SPC_CHR		   ' '	  /* CH23 - Space */		
+#define TAB_CHR        '/t'	  /* CH24 - Tab*/	
+#define HASH_CHR		'#'	  /* CH25 - Hash (#)*/
 /*  Special case tokens processed separately one by one in the token-driven part of the scanner:
  *  LPR_T, RPR_T, LBR_T, RBR_T, EOS_T, SEOF_T and special chars used for tokenis include _, & and ' */
 
@@ -236,185 +236,181 @@ typedef struct scannerData {
 #define FS		-1		/* Illegal State */
 
  /* TO_DO: State transition table definition */
-#define NUM_STATES		102
-#define CHAR_CLASSES	23
+#define NUM_STATES		59
+#define CHAR_CLASSES	26
 
 /* TO_DO: Transition table - type of states defined in separate table */
 static nl_int transitionTable[NUM_STATES][CHAR_CLASSES] = {
-	/*   EOS, EOF,  /,   *,   {,   },   =,   -,   [,   ],   ;,   !,   ",   (,   ),   <,   >,  \n,  ,,   0,   L,   N,   ^   */
+	/*   EOS, EOF,  /,   *,   {,   },   =,   -,   [,   ],   ;,   !,   ",   (,   ),   <,   >,  \n,  ,,   0,   L,   N,   ^,   Sp, Tab,  #  */
+
 	/* S0: Start */
-	{    AS,  AS,  49,  ER,  ER,  ER,  ER,   7,  ER,  ER,  ER,  55,  80,  ER,  ER,  ER,  ER,  ER,  ER,  70,   1,   3,  ER },
+	{   AS,  AS,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  23,  ER,  ER,  ER,  ER,  ER,  ER,  20,   1,  20,  ER,  ER,  ER,  25 },
 
-	/* S1: Recognizing keywords/variables - All letters start here */
-	{   ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR,  20,  10,  20,  ER }, /* L → S20, N → S10 (notes) */
+	/* S1: Recognizing keywords/variables */
+	{  ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,   5,  ER,  ER,  ER,  ER,  25 }, /* All L → S5 */
 
-	/* S2: Unused */
-	{   ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR },
+	/* S2: 'd' (Possible 'df') */
+	{  ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,   4,  ER,  ER,  ER,  ER,  ER },
 
 	/* S3: Note start [A-G] */
-	{   ENR, ENR, ENR, ENR, ENR, ENR, ENR,   7, ENR, ENR,  AS, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR,   5, ENR, ENR,  ER },
+	{   ER,  ER,  ER,  ER,  ER,  ER,  ER,  29,  ER,  ER,  AS,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ENR, ENR,  ER,  ER,  ER,  ER,  ER },
 
-	/* S4-S9: Note states */
-	{   ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR,  ER },
-	{   ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR,   9, ENR, ENR, ENR, ENR, ENR,  ER },
-	{   ENR, ENR, ENR, ENR,  11, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR,  ER },
-	{   ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR,  AS, ENR, ENR, ENR, ENR, ENR,   8, ENR, ER , ER , ER , ER ,  ER }, /* S7: -> */
-	{   ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR,  AS, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR,  ER }, /* S8: -> complete */
-	{   ENR, ENR, ENR, ENR, ENR,  17, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR,  ER },
+	/* S4: 'df' complete */
+	{  ENR, ENR, ER,  ER,  ER,  ER,   6,  ER,  ER,  ER,  AS,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,   5,   5,   5,  ER,  ER,  ER,  ER },
 
-	/* S10: Note or keyword continuation [A-G] or other letters */
-	{   ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR,  AS, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR,  20,  20,  20,  ER }, /* Continue identifier or keyword */
+	/* S5: Variable name or identifier */
+	{  ENR, ENR, ER,  ER,  ER,  ER,   6,  ER,  ER,  ER,  AS,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,   5,   5,   5,  ER,  ER,  ER,  ER },
 
-	/* S11-S19: Note states */
-	{   ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR,  ER },
-	{    AS, ENR, ENR, ENR, ENR, ENR,  23, ENR, ENR, ENR,  AS, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR,  22,  22,  ER },
-	{   ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR,  80, ENR, ENR, ENR, ENR, ENR, ENR,  24,  24,  24,  ER },
-	{    AS, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR,  30, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR,  ER },
-	{   ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR,  17, ENR,  ER },
-	{   ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR,  19, ENR,  ER },
-	{   ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR,  AS, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR,  ER },
+	/* S6: = */
+	{  ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  23,  ER,  ER,  ER,  ER,  ER,  ER,  10,  10,  10,  ER,  ER,  ER,  ER },
 
-	/* S20-S30: Identifier/Keyword states */
-	{    AS, ENR, ENR, ENR, ENR, ENR,  23, ENR, ENR, ENR,  AS, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR,  22,  22,  22,  ER }, /* S20: Identifier start */
-	{   ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR,  ER }, /* S21: Unused */
-	{    AS, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR,  AS, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR,  22,  22,  22,  ER }, /* S22: Continue identifier */
-	{   ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR,  80, ENR, ENR, ENR, ENR, ENR, ENR,  24,  24,  24,  ER }, /* S23: = */
-	{    AS, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR,  30, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR,  ER }, /* S24: Value after = */
-	{   ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR,  ER },
-	{   ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR,  ER },
-	{   ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR,  ER },
-	{   ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR,  ER },
-	{   ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR,  ER },
-	{    AS, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR,  AS, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR,  ER }, /* S30: Variable complete */
+	/* S7: 's' (Possible 'section') */
+	{  ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,   8,  ER,  ER,  ER,  ER,  ER },
 
-	/* S31: 'section' start */
-	{   ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR,  32, ENR, ENR },
+	/* S8: 'se' */
+	{  ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,   9,  ER,  ER,  ER,  ER,  ER },
 
-	/* S32-S36: 'section' continued */
-	{   ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR,  33, ENR, ENR },
-	{   ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR,  34, ENR, ENR },
-	{   ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR,  35, ENR, ENR },
-	{   ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR,  36, ENR, ENR },
-	{   ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR,  37, ENR, ENR },
+	/* S9: 'sec' */
+	{  ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  12,  ER,  ER,  ER,  ER,  ER },
 
-	/* S37: 'section' complete */
-	{   ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR,  AS, ENR, ENR,  38, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR,  ER },
+	/* S10: Value after = */
+	{  ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  11,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER },
 
-	/* S38: '(' */
-	{   ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR,  39, ENR, ENR, ENR, ENR, ENR, ENR, ENR,  ER },
+	/* S11: Variable complete */
+	{   AS, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  AS,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER },
 
-	/* S39: ')' */
-	{   ENR, ENR, ENR, ENR,  40, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR,  ER },
+	/* S12: 'sect' */
+	{  ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  14,  ER,  ER,  ER,  ER,  ER },
 
-	/* S40: '{' */
-	{   ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR,  ER },
+	/* S13: 'P' (Possible 'Print') */
+	{  ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  39,  ER,  ER,  ER,  ER,  ER },
 
-	/* S41: Inside function */
-	{   ENR, ENR,  49, ENR,  40,  43, ER ,   7, ER , ER ,  42,  55,  80, ER , ER , ER , ER , ER , ER ,  70,   1,   3,  ER },
+	/* S14: 'secti' */
+	{  ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  16,  ER,  ER,  ER,  ER,  ER },
 
-	/* S42: Function end ; */
-	{   ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR,  44, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR,  ER },
+	/* S15: 'T' (Possible 'Tempo') */
+	{  ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  43,  ER,  ER,  ER,  ER,  ER },
 
-	/* S43: '}' */
-	{   ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR,  45, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR,  ER },
+	/* S16: 'sectio' */
+	{  ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  17,  ER,  ER,  ER,  ER,  ER },
 
-	/* S44: Second ; */
-	{   ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR,  AS, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR, ENR,  ER },
+	/* S17: 'section' complete */
+	{  ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  AS,  ER,  ER,  18,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER },
 
-	/* S45-S49: Function end and comment start */
-	{   ENR, ENR, ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER ,  ER },
-	{   ENR, ENR, ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER ,  ER },
-	{   ENR, ENR, ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER ,  ER },
-	{   ENR, ENR, ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER ,  ER },
-	{   ENR, ENR, ER ,  50, ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , 100 }, /* S49: Comment start */
+	/* S18: '(' */
+	{  ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  19,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER },
 
-	/* S50: Comment '*' */
-	{   ENR, ENR, ER ,  51, ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , 100 },
+	/* S19: ')' */
+	{  ENR, ENR, ER,  ER,  21,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER },
 
-	/* S51: Comment '**' */
-	{   ENR, ENR, ER ,  52, ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER ,  ER },
+	/* S20: Number literal */
+	{   AS, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  AS,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  20,  ER,  ER,  ER,  ER,  ER,  ER },
 
-	/* S52: Comment body */
-	{   ENR, ENR, ER ,  53,  52,  52,  52,  52,  52,  52,  52,  52,  52,  52,  52,  52,  52,  52,  52,  52,  52,  52,  52 },
+	/* S21: '{' */
+	{  ENR, ENR, ER,  ER,  ER,  22,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER },
 
-	/* S53: Comment ending '*' */
-	{   ENR, ENR, ER ,  54,  52,  52,  52,  52,  52,  52,  52,  52,  52,  52,  52,  52,  52,  52,  52,  52,  52,  52,  52 },
+	/* S22: Inside function */
+	{  ENR, ENR, ER,  ER,  21,  26,  ER,  ER,  ER,  ER,  ER,  ER,  23,  ER,  ER,  ER,  ER,  ER,  ER,  20,   1,   3,  ER,  ER,  ER,  25 },
 
-	/* S54: Comment ending */
-	{   ENR, ENR,  AS,  52,  52,  52,  52,  52,  52,  52,  52,  52,  52,  52,  52,  52,  52,  52,  52,  52,  52,  52,  52 },
+	/* S23: String literal */
+	{  ENR,  ER,  23,  23,  23,  23,  23,  23,  23,  23,  23,  23,  AS,  23,  23,  23,  23,  23,  23,  23,  23,  23,  23,  23,  23,  23 },
 
-	/* S55-S59: !END states */
-	{   ENR, ENR, ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ENR,  56, ENR,  ER },
-	{   ENR, ENR, ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ENR,  57, ENR,  ER },
-	{   ENR, ENR, ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ENR,  58, ENR,  ER },
-	{   ENR, ENR, ER , ER , ER , ER , ER , ER , ER , ER , AS , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER ,  ER },
-	{   ENR, ENR, ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER ,  ER },
+	/* S24: Function body content (simplified) */
+	{  ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER },
 
-	/* S60: 'Print' start */
-	{   ENR, ENR, ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ENR,  61, ENR,  ER },
+	/* S25: Comment start */
+	{  ENR, ENR,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37 },
 
-	/* S61-S64: 'Print' continued */
-	{   ENR, ENR, ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ENR,  62, ENR,  ER },
-	{   ENR, ENR, ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ENR,  63, ENR,  ER },
-	{   ENR, ENR, ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ENR,  64, ENR,  ER },
-	{   ENR, ENR, ER , ER , ER , ER ,  23, ER , ER , ER , AS , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER ,  ER }, /* S64: 'Print' complete */
+	/* S26: '}' */
+	{  ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  27,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER },
 
-	/* S65: 'ff' start */
-	{   ENR, ENR, ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ENR,  66, ENR,  ER },
+	/* S27: Section complete */
+	{   AS, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  AS,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER },
 
-	/* S66-S69: 'ff' continued */
-	{   ENR, ENR, ER , ER , ER , ER , ER , ER , ER , ER , AS , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER ,  ER },
-	{   ENR, ENR, ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER ,  ER },
-	{   ENR, ENR, ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER ,  ER },
-	{   ENR, ENR, ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER ,  ER },
+	/* S28: 'r' (Possible 'repeatif') */
+	{  ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  47,  ER,  ER,  ER,  ER,  ER },
 
-	/* S70: Number literal */
-	{    AS, ENR, ER , ER , ER , ER , ER , ER , ER , ER , AS , ER , ER , ER , ER , ER , ER , ER , ER ,  70, ER ,  70,  AS },
+	/* S29: Note continuation */
+	{   AS, ENR, ER,  ER,  30,  ER,  ER,  ER,  ER,  ER,  AS,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER },
 
-	/* S71-S79: Unused */
-	{   ENR, ENR, ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER ,  ER },
-	{   ENR, ENR, ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER ,  ER },
-	{   ENR, ENR, ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER ,  ER },
-	{   ENR, ENR, ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER ,  ER },
-	{   ENR, ENR, ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER ,  ER },
-	{   ENR, ENR, ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER ,  ER },
-	{   ENR, ENR, ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER ,  ER },
-	{   ENR, ENR, ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER ,  ER },
-	{   ENR, ENR, ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER ,  ER },
+	/* S30: '->' */
+	{  ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  31,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER },
 
-	/* S80: String literal */
-	{   ENR,  ER,  80,  80,  80,  80,  80,  80,  80,  80,  80,  80,  AS,  80,  80,  80,  80,  80,  80,  80,  80,  80,  80 },
+	/* S31: Note -> complete */
+	{  ENR, ENR, ER,  ER,  32,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER },
 
-	/* S81-S89: Unused */
-	{   ENR, ENR, ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER ,  ER },
-	{   ENR, ENR, ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER ,  ER },
-	{   ENR, ENR, ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER ,  ER },
-	{   ENR, ENR, ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER ,  ER },
-	{   ENR, ENR, ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER ,  ER },
-	{   ENR, ENR, ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER ,  ER },
-	{   ENR, ENR, ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER ,  ER },
-	{   ENR, ENR, ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER ,  ER },
-	{   ENR, ENR, ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER ,  ER },
+	/* S32: '{' for note */
+	{  ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  33,  ER,  ER,  ER,  ER,  ER,  ER,  ER },
 
-	/* S90: 'repeatif' start */
-	{   ENR, ENR, ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ENR,  91, ENR,  ER },
+	/* S33: Note dynamics */
+	{  ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  34,  ER,  ER,  ER,  ER,  ER },
 
-	/* S91-S96: 'repeatif' continued */
-	{   ENR, ENR, ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ENR,  92, ENR,  ER },
-	{   ENR, ENR, ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ENR,  93, ENR,  ER },
-	{   ENR, ENR, ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ENR,  94, ENR,  ER },
-	{   ENR, ENR, ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ENR,  95, ENR,  ER },
-	{   ENR, ENR, ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ENR,  96, ENR,  ER },
-	{   ENR, ENR, ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ENR,  97, ENR,  ER },
+		/* S34: ',' */
+	{ ENR, ENR, ER,  ER,  ER,  35,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER },
 
-	/* S97: 'repeatif' complete */
-	{   ENR, ENR, ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER ,  98, ER , ER , ER , ER , ER , ER ,  ER },
+		/* S35: Dynamics keyword */
+	{ ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  36,  ER,  ER,  ER,  ER,  ER },
 
-	/* S98: '<' for repeatif */
-	{   ENR, ENR, ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ENR,  99, ENR,  ER },
+		/* S36: '}' */
+	{ ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  AS,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER },
 
-	/* S99: Condition content */
-	{   ENR, ENR, ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , ER , AS , ER , ER , ENR,  99, ENR,  ER },
+		/* S37: Comment body */
+	{ ENR, ENR,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  38 },
+
+		/* S38: Comment end */
+	{ AS, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  AS,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER },
+
+		/* S39: 'Pr' */
+	{ ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  40,  ER,  ER,  ER,  ER,  ER },
+
+		/* S40: 'Pri' */
+	{ ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  41,  ER,  ER,  ER,  ER,  ER },
+
+		/* S41: 'Prin' */
+	{ ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  42,  ER,  ER,  ER,  ER,  ER },
+
+		/* S42: 'Print' complete */
+	{ ENR, ENR, ER,  ER,  ER,  ER,   6,  ER,  ER,  ER,  AS,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER },
+
+		/* S43: 'Te' */
+	{ ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  44,  ER,  ER,  ER,  ER,  ER },
+
+		/* S44: 'Tem' */
+	{ ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  45,  ER,  ER,  ER,  ER,  ER },
+
+		/* S45: 'Temp' */
+	{ ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  46,  ER,  ER,  ER,  ER,  ER },
+
+		/* S46: 'Tempo' complete */
+	{ ENR, ENR, ER,  ER,  ER,  ER,   6,  ER,  ER,  ER,  AS,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER },
+
+		/* S47: 're' */
+	{ ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  48,  ER,  ER,  ER,  ER,  ER },
+
+		/* S48: 'rep' */
+	{ ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  49,  ER,  ER,  ER,  ER,  ER },
+
+		/* S49: 'repe' */
+	{ ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  50,  ER,  ER,  ER,  ER,  ER },
+
+		/* S50: 'repea' */
+	{ ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  51,  ER,  ER,  ER,  ER,  ER },
+
+		/* S51: 'repeat' */
+	{ ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  52,  ER,  ER,  ER,  ER,  ER },
+
+		/* S52: 'repeati' */
+	{ ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  53,  ER,  ER,  ER,  ER,  ER },
+
+		/* S53: 'repeatif' complete */
+	{ ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  54,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER },
+
+		/* S54: '<' */
+	{ ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  55,  ER,  ER,  ER,  ER,  ER },
+
+		/* S55: Condition content */
+	{ ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  AS,  ER,  ER,  55,  55,  55,  ER,  ER,  ER,  ER }
+
 };
 
 
@@ -425,108 +421,19 @@ static nl_int transitionTable[NUM_STATES][CHAR_CLASSES] = {
 
 /* TO_DO: Define list of acceptable states */
 static nl_int stateType[NUM_STATES] = {
-	FSNR, /* S0  - Start (SEOF_T: EOS/EOF) */
-	NOFS, /* S1  - Recognizing keywords/variables */
-	NOFS, /* S2  - Unused */
-	NOFS, /* S3  - Note start [A-G] */
-	NOFS, /* S4  - Unused */
-	NOFS, /* S5  - Note continuation */
-	NOFS, /* S6  - Unused */
-	NOFS, /* S7  - Note - or -> */
-	FSNR, /* S8  - -> complete (OP_NOTE_T) */
-	NOFS, /* S9  - Note { */
-	NOFS, /* S10 - Note/keyword continuation */
-	FSNR, /* S11 - Unused (was 'df' complete, now reserved) */
-	NOFS, /* S12 - Variable name */
-	NOFS, /* S13 - Assignment '=' */
-	NOFS, /* S14 - String value */
-	NOFS, /* S15 - Integer/keyword value */
-	NOFS, /* S16 - Unused */
-	NOFS, /* S17 - Note dynamics */
-	NOFS, /* S18 - Unused */
-	FSNR, /* S19 - Note complete (VID_T) */
-	FSNR, /* S20 - Identifier/keyword start (VID_T/KW_T) */
-	NOFS, /* S21 - Unused */
-	FSNR, /* S22 - Identifier continue (VID_T/KW_T) */
-	NOFS, /* S23 - = */
-	FSNR, /* S24 - Value after = (INL_T/STR_T/VID_T) */
-	NOFS, /* S25 - Unused */
-	NOFS, /* S26 - Unused */
-	NOFS, /* S27 - Unused */
-	NOFS, /* S28 - Unused */
-	NOFS, /* S29 - Unused */
-	FSNR, /* S30 - Variable complete (EOS_T) */
-	NOFS, /* S31 - 'section' start */
-	NOFS, /* S32 - 'section' continued */
-	NOFS, /* S33 - 'section' continued */
-	NOFS, /* S34 - 'section' continued */
-	NOFS, /* S35 - 'section' continued */
-	NOFS, /* S36 - 'section' continued */
-	FSNR, /* S37 - 'section' complete (KW_T) */
-	NOFS, /* S38 - '(' */
-	NOFS, /* S39 - ')' */
-	NOFS, /* S40 - '{' */
-	NOFS, /* S41 - Inside function */
-	NOFS, /* S42 - Function end ; */
-	NOFS, /* S43 - '}' */
-	FSNR, /* S44 - Second ; (EOS_T) */
-	FSNR, /* S45 - Function complete (VID_T) */
-	NOFS, /* S46 - Unused */
-	NOFS, /* S47 - Unused */
-	NOFS, /* S48 - Unused */
-	NOFS, /* S49 - Comment start / */
-	NOFS, /* S50 - Comment * */
-	NOFS, /* S51 - Comment ** */
-	NOFS, /* S52 - Comment body */
-	NOFS, /* S53 - Comment ending * */
-	FSNR, /* S54 - Comment complete (CMT_T) */
-	NOFS, /* S55 - '!' for !END */
-	NOFS, /* S56 - 'E' in !END */
-	NOFS, /* S57 - 'N' in !END */
-	FSNR, /* S58 - !END complete (SEOF_T) */
-	NOFS, /* S59 - Unused */
-	NOFS, /* S60 - 'Print' start */
-	NOFS, /* S61 - 'Print' continued */
-	NOFS, /* S62 - 'Print' continued */
-	NOFS, /* S63 - 'Print' continued */
-	FSNR, /* S64 - 'Print' complete (KW_T) */
-	NOFS, /* S65 - 'ff' start */
-	FSNR, /* S66 - 'ff' complete (KW_T) */
-	NOFS, /* S67 - Unused */
-	NOFS, /* S68 - Unused */
-	NOFS, /* S69 - Unused */
-	FSWR, /* S70 - Number complete (INL_T) */
-	NOFS, /* S71 - Unused */
-	NOFS, /* S72 - Unused */
-	NOFS, /* S73 - Unused */
-	NOFS, /* S74 - Unused */
-	NOFS, /* S75 - Unused */
-	NOFS, /* S76 - Unused */
-	NOFS, /* S77 - Unused */
-	NOFS, /* S78 - Unused */
-	NOFS, /* S79 - Unused */
-	FSNR, /* S80 - String complete (STR_T) */
-	NOFS, /* S81 - Unused */
-	NOFS, /* S82 - Unused */
-	NOFS, /* S83 - Unused */
-	NOFS, /* S84 - Unused */
-	NOFS, /* S85 - Unused */
-	NOFS, /* S86 - Unused */
-	NOFS, /* S87 - Unused */
-	NOFS, /* S88 - Unused */
-	NOFS, /* S89 - Unused */
-	NOFS, /* S90 - 'repeatif' start */
-	NOFS, /* S91 - 'repeatif' continued */
-	NOFS, /* S92 - 'repeatif' continued */
-	NOFS, /* S93 - 'repeatif' continued */
-	NOFS, /* S94 - 'repeatif' continued */
-	NOFS, /* S95 - 'repeatif' continued */
-	NOFS, /* S96 - 'repeatif' continued */
-	FSNR, /* S97 - 'repeatif' complete (KW_T) */
-	NOFS, /* S98 - '<' for repeatif */
-	FSNR, /* S99 - Repeatif condition complete (KW_T) */
-	NOFS, /* S100 - Unused */
-	NOFS  /* S101 - Unused */
+	NOFS, /* S0 */  NOFS, /* S1 */  NOFS, /* S2 */  NOFS, /* S3 */  FSWR, /* S4 */  // 'df'
+	NOFS, /* S5 */  NOFS, /* S6 */  NOFS, /* S7 */  NOFS, /* S8 */  NOFS, /* S9 */  // Variable, P for Print
+	NOFS, /* S10 */ FSNR, /* S11 */ NOFS, /* S12 */ NOFS, /* S13 */ NOFS, /* S14 */ // Variable complete
+	NOFS, /* S15 */ NOFS, /* S16 */ FSWR, /* S17 */ NOFS, /* S18 */ NOFS, /* S19 */ // 'section'
+	FSNR, /* S20 */ NOFS, /* S21 */ NOFS, /* S22 */ FSNR, /* S23 */ NOFS, /* S24 */ // Number, String
+	NOFS, /* S25 */ NOFS, /* S26 */ FSNR, /* S27 */ NOFS, /* S28 */ FSNR, /* S29 */ // Section complete, Note
+	NOFS, /* S30 */ NOFS, /* S31 */ NOFS, /* S32 */ NOFS, /* S33 */ NOFS, /* S34 */
+	NOFS, /* S35 */ FSNR, /* S36 */ NOFS, /* S37 */ FSNR, /* S38 */ NOFS, /* S39 */ // Note complete, Comment
+	NOFS, /* S40 */ NOFS, /* S41 */ FSWR, /* S42 */ NOFS, /* S43 */ NOFS, /* S44 */ // 'Print'
+	NOFS, /* S45 */ FSWR, /* S46 */ NOFS, /* S47 */ NOFS, /* S48 */ NOFS, /* S49 */ // 'Tempo'
+	NOFS, /* S50 */ NOFS, /* S51 */ NOFS, /* S52 */ FSWR, /* S53 */ NOFS, /* S54 */ // 'repeatif'
+	FSNR  /* S55 */ // Condition complete
+	/* Ensure NUM_STATES >= 56; add NOFS for S56-S58 if needed */
 };
 
 
@@ -570,108 +477,18 @@ Token funcNOTE(nl_string lxeme);
 
 /* TO_DO: Define final state table */
 static PTR_ACCFUN finalStateTable[NUM_STATES] = {
-	funcSEOF,  /* S0  - Start (SEOF_T) */
-	NULL,      /* S1  - Recognizing keywords/variables */
-	NULL,      /* S2  - Unused */
-	NULL,      /* S3  - Note start [A-G] */
-	NULL,      /* S4  - Unused */
-	NULL,      /* S5  - Note continuation */
-	NULL,      /* S6  - Unused */
-	NULL,      /* S7  - Note - or -> */
-	funcNOTE,  /* S8  - -> complete (OP_NOTE_T) - New function needed */
-	NULL,      /* S9  - Note { */
-	NULL,      /* S10 - Note/keyword continuation */
-	funcID,    /* S11 - Unused (was 'df', now reserved) */
-	NULL,      /* S12 - Variable name */
-	NULL,      /* S13 - Assignment '=' */
-	NULL,      /* S14 - String value */
-	NULL,      /* S15 - Integer/keyword value */
-	NULL,      /* S16 - Unused */
-	NULL,      /* S17 - Note dynamics */
-	NULL,      /* S18 - Unused */
-	funcID,    /* S19 - Note complete (VID_T) */
-	funcID,    /* S20 - Identifier/keyword start (VID_T/KW_T via funcID) */
-	NULL,      /* S21 - Unused */
-	funcID,    /* S22 - Identifier continue (VID_T/KW_T via funcID) */
-	NULL,      /* S23 - = */
-	funcID,    /* S24 - Value after = (INL_T/STR_T/VID_T via funcID) */
-	NULL,      /* S25 - Unused */
-	NULL,      /* S26 - Unused */
-	NULL,      /* S27 - Unused */
-	NULL,      /* S28 - Unused */
-	NULL,      /* S29 - Unused */
-	funcID,    /* S30 - Variable complete (EOS_T) */
-	NULL,      /* S31 - 'section' start */
-	NULL,      /* S32 - 'section' continued */
-	NULL,      /* S33 - 'section' continued */
-	NULL,      /* S34 - 'section' continued */
-	NULL,      /* S35 - 'section' continued */
-	NULL,      /* S36 - 'section' continued */
-	funcKEY,   /* S37 - 'section' complete (KW_T) */
-	NULL,      /* S38 - '(' */
-	NULL,      /* S39 - ')' */
-	NULL,      /* S40 - '{' */
-	NULL,      /* S41 - Inside function */
-	NULL,      /* S42 - Function end ; */
-	NULL,      /* S43 - '}' */
-	funcID,    /* S44 - Second ; (EOS_T) */
-	funcID,    /* S45 - Function complete (VID_T) */
-	NULL,      /* S46 - Unused */
-	NULL,      /* S47 - Unused */
-	NULL,      /* S48 - Unused */
-	NULL,      /* S49 - Comment start / */
-	NULL,      /* S50 - Comment * */
-	NULL,      /* S51 - Comment ** */
-	NULL,      /* S52 - Comment body */
-	NULL,      /* S53 - Comment ending * */
-	funcCMT,   /* S54 - Comment complete (CMT_T) */
-	NULL,      /* S55 - '!' for !END */
-	NULL,      /* S56 - 'E' in !END */
-	NULL,      /* S57 - 'N' in !END */
-	funcSEOF,  /* S58 - !END complete (SEOF_T) */
-	NULL,      /* S59 - Unused */
-	NULL,      /* S60 - 'Print' start */
-	NULL,      /* S61 - 'Print' continued */
-	NULL,      /* S62 - 'Print' continued */
-	NULL,      /* S63 - 'Print' continued */
-	funcKEY,   /* S64 - 'Print' complete (KW_T) */
-	NULL,      /* S65 - 'ff' start */
-	funcKEY,   /* S66 - 'ff' complete (KW_T) */
-	NULL,      /* S67 - Unused */
-	NULL,      /* S68 - Unused */
-	NULL,      /* S69 - Unused */
-	funcIL,    /* S70 - Number complete (INL_T) */
-	NULL,      /* S71 - Unused */
-	NULL,      /* S72 - Unused */
-	NULL,      /* S73 - Unused */
-	NULL,      /* S74 - Unused */
-	NULL,      /* S75 - Unused */
-	NULL,      /* S76 - Unused */
-	NULL,      /* S77 - Unused */
-	NULL,      /* S78 - Unused */
-	NULL,      /* S79 - Unused */
-	funcSL,    /* S80 - String complete (STR_T) */
-	NULL,      /* S81 - Unused */
-	NULL,      /* S82 - Unused */
-	NULL,      /* S83 - Unused */
-	NULL,      /* S84 - Unused */
-	NULL,      /* S85 - Unused */
-	NULL,      /* S86 - Unused */
-	NULL,      /* S87 - Unused */
-	NULL,      /* S88 - Unused */
-	NULL,      /* S89 - Unused */
-	NULL,      /* S90 - 'repeatif' start */
-	NULL,      /* S91 - 'repeatif' continued */
-	NULL,      /* S92 - 'repeatif' continued */
-	NULL,      /* S93 - 'repeatif' continued */
-	NULL,      /* S94 - 'repeatif' continued */
-	NULL,      /* S95 - 'repeatif' continued */
-	NULL,      /* S96 - 'repeatif' continued */
-	funcKEY,   /* S97 - 'repeatif' complete (KW_T) */
-	NULL,      /* S98 - '<' for repeatif */
-	funcKEY,   /* S99 - Repeatif condition complete (KW_T) */
-	NULL,      /* S100 - Unused */
-	NULL       /* S101 - Unused */
+	NULL,      /* S0 */  NULL,      /* S1 */  NULL,      /* S2 */  NULL,      /* S3 */ funcKEY,   /* S4 */  // 'df'
+	NULL,    /* S5 */  NULL,      /* S6 */  NULL,      /* S7 */  NULL,      /* S8 */  NULL,      /* S9 */  // Variable or 'Print' start
+	NULL,      /* S10 */ funcID,    /* S11 */ NULL,      /* S12 */ NULL,      /* S13 */ NULL,      /* S14 */ // Variable complete
+	NULL,      /* S15 */ NULL,      /* S16 */ funcKEY,   /* S17 */ NULL,      /* S18 */ NULL,      /* S19 */ // 'section'
+	funcIL,    /* S20 */ NULL,      /* S21 */ NULL,      /* S22 */ funcSL,    /* S23 */ NULL,      /* S24 */ // Number, String
+	NULL,      /* S25 */ NULL,      /* S26 */ funcID,    /* S27 */ NULL,      /* S28 */ funcNOTE,  /* S29 */ // Section complete, Note
+	NULL,      /* S30 */ NULL,      /* S31 */ NULL,      /* S32 */ NULL,      /* S33 */ NULL,      /* S34 */
+	NULL,      /* S35 */ funcNOTE,  /* S36 */ NULL,      /* S37 */ funcCMT,   /* S38 */ NULL,      /* S39 */ // Note, Comment
+	NULL,      /* S40 */ NULL,      /* S41 */ funcKEY,   /* S42 */ NULL,      /* S43 */ NULL,      /* S44 */ // 'Print'
+	NULL,      /* S45 */ funcKEY,   /* S46 */ NULL,      /* S47 */ NULL,      /* S48 */ NULL,      /* S49 */ // 'Tempo'
+	NULL,      /* S50 */ NULL,      /* S51 */ NULL,      /* S52 */ funcKEY,   /* S53 */ NULL,      /* S54 */ // 'repeatif'
+	funcKEY    /* S55 */ // Condition complete (repeaetif)
 };
 
 /*

@@ -243,175 +243,180 @@ typedef struct scannerData {
 
 /* TO_DO: Transition table - type of states defined in separate table */
 static nl_int transitionTable[NUM_STATES][CHAR_CLASSES] = {
-	/*   EOS, EOF,  /,   *,   {,   },   =,   -,   [,   ],   ;,   !,   ",   (,   ),   <,   >,  \n,  ,,   0,   L,   N,   ^,   Sp, Tab,  #  */
+	/* EOS,	  EOF,    /,   *,   {,    },   =,   -,   [,   ],   ;,   !,   ",   (,   ),   <,   >,  \n,  ,,   0,    L,   N,   ^,  Sp, Tab,  #     */
+	/*  1		2	  3	   4    5     6    7    8    9    10   11   12   13   14   15   16   17   18  19   20    21   22   23  24  25    26           */
+
 
 	/* S0: Start */
-	{   AS,  AS,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  23,  ER,  ER,  ER,  ER,  ER,  ER,  20,   1,  20,  ER,  ER,  ER,  25 },
+	{  AS,    AS,     ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  23,  ER,  ER,  ER,  ER,  ER,  ER,  20,   1,  3,  ER,  ER,  ER,  25 },
 
 	/* S1: Recognizing keywords/variables */
-	{  ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,   5,  ER,  ER,  ER,  ER,  25 }, /* All L → S5 */
+	{  ENR,   ENR,    ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,   5,  ER,  ER,  ER,  ER,  25 }, 
 
 	/* S2: 'd' (Possible 'df') */
-	{  ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,   4,  ER,  ER,  ER,  ER,  ER },
+	{  ENR,   ENR,    ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,   4,  ER,  ER,  ER,  ER,  ER },
 
 	/* S3: Note start [A-G] */
-	{   ER,  ER,  ER,  ER,  ER,  ER,  ER,  29,  ER,  ER,  AS,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ENR, ENR,  ER,  ER,  ER,  ER,  ER },
+	{  ER,    ER,     ER,  ER,  ER,  ER,  ER,  29,  ER,  ER,  AS,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  56, ENR,  ER,  ER,  ER,  ER,  ER },
 
 	/* S4: 'df' complete */
-	{  ENR, ENR, ER,  ER,  ER,  ER,   6,  ER,  ER,  ER,  AS,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,   5,   5,   5,  ER,  ER,  ER,  ER },
+	{  ENR,   ENR,    ER,  ER,  ER,  ER,   6,  ER,  ER,  ER,  AS,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,   5,   5,   5,  ER,  ER,  ER,  ER },
 
 	/* S5: Variable name or identifier */
-	{  ENR, ENR, ER,  ER,  ER,  ER,   6,  ER,  ER,  ER,  AS,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,   5,   5,   5,  ER,  ER,  ER,  ER },
+	{  ENR,   ENR,	  ER,  ER,  ER,  ER,   6,  ER,  ER,  ER,  AS,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,   5,   5,   5,  ER,  ER,  ER,  ER },
 
 	/* S6: = */
-	{  ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  23,  ER,  ER,  ER,  ER,  ER,  ER,  10,  10,  10,  ER,  ER,  ER,  ER },
+	{  ENR,   ENR,	  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  23,  ER,  ER,  ER,  ER,  ER,  ER,  10,  10,  10,  ER,  ER,  ER,  ER },
 
 	/* S7: 's' (Possible 'section') */
-	{  ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,   8,  ER,  ER,  ER,  ER,  ER },
+	{  ENR,   ENR,	  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,   8,  ER,  ER,  ER,  ER,  ER },
 
 	/* S8: 'se' */
-	{  ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,   9,  ER,  ER,  ER,  ER,  ER },
+	{  ENR,   ENR,	  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,   9,  ER,  ER,  ER,  ER,  ER },
 
 	/* S9: 'sec' */
-	{  ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  12,  ER,  ER,  ER,  ER,  ER },
+	{  ENR,   ENR,	  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  12,  ER,  ER,  ER,  ER,  ER },
 
 	/* S10: Value after = */
-	{  ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  11,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER },
+	{  ENR,   ENR,	  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  11,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER },
 
 	/* S11: Variable complete */
-	{   AS, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  AS,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER },
+	{   AS,   ENR,	  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  AS,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER },
 
 	/* S12: 'sect' */
-	{  ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  14,  ER,  ER,  ER,  ER,  ER },
+	{  ENR,   ENR,	  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  14,  ER,  ER,  ER,  ER,  ER },
 
 	/* S13: 'P' (Possible 'Print') */
-	{  ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  39,  ER,  ER,  ER,  ER,  ER },
+	{  ENR,   ENR,	  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  39,  ER,  ER,  ER,  ER,  ER },
 
 	/* S14: 'secti' */
-	{  ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  16,  ER,  ER,  ER,  ER,  ER },
+	{  ENR,   ENR,	  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  16,  ER,  ER,  ER,  ER,  ER },
 
 	/* S15: 'T' (Possible 'Tempo') */
-	{  ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  43,  ER,  ER,  ER,  ER,  ER },
+	{  ENR,   ENR,	  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  43,  ER,  ER,  ER,  ER,  ER },
 
 	/* S16: 'sectio' */
-	{  ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  17,  ER,  ER,  ER,  ER,  ER },
+	{  ENR,   ENR,	  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  17,  ER,  ER,  ER,  ER,  ER },
 
 	/* S17: 'section' complete */
-	{  ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  AS,  ER,  ER,  18,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER },
+	{  ENR,   ENR,	  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  AS,  ER,  ER,  18,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER },
 
 	/* S18: '(' */
-	{  ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  19,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER },
+	{  ENR,   ENR,	  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  19,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER },
 
 	/* S19: ')' */
-	{  ENR, ENR, ER,  ER,  21,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER },
+	{  ENR,   ENR,	  ER,  ER,  21,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER },
 
 	/* S20: Number literal */
-	{   AS, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  AS,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  20,  ER,  ER,  ER,  ER,  ER,  ER },
+	{  AS,   ENR,	  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  AS,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  20,  ER,  ER,  ER,  ER,  ER,  ER },
 
 	/* S21: '{' */
-	{  ENR, ENR, ER,  ER,  ER,  22,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER },
+	{  ENR,  ENR,	  ER,  ER,  ER,  22,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER },
 
 	/* S22: Inside function */
-	{  ENR, ENR, ER,  ER,  21,  26,  ER,  ER,  ER,  ER,  ER,  ER,  23,  ER,  ER,  ER,  ER,  ER,  ER,  20,   1,   3,  ER,  ER,  ER,  25 },
+	{  ENR,  ENR,	  ER,  ER,  21,  26,  ER,  ER,  ER,  ER,  ER,  ER,  23,  ER,  ER,  ER,  ER,  ER,  ER,  20,   1,   3,  ER,  ER,  ER,  25 },
 
 	/* S23: String literal */
-	{  ENR,  ER,  23,  23,  23,  23,  23,  23,  23,  23,  23,  23,  AS,  23,  23,  23,  23,  23,  23,  23,  23,  23,  23,  23,  23,  23 },
+	{  ENR,  ER,	  23,  23,  23,  23,  23,  23,  23,  23,  23,  23,  AS,  23,  23,  23,  23,  23,  23,  23,  23,  23,  23,  23,  23,  23 },
 
 	/* S24: Function body content (simplified) */
-	{  ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER },
+	{  ENR,  ENR,	  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER },
 
 	/* S25: Comment start */
-	{  ENR, ENR,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37 },
+	{  ENR,  ENR,	  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37 },
 
 	/* S26: '}' */
-	{  ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  27,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER },
+	{  ENR,  ENR,	  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  27,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER },
 
 	/* S27: Section complete */
-	{   AS, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  AS,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER },
+	{   AS,  ENR,	  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  AS,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER },
 
 	/* S28: 'r' (Possible 'repeatif') */
-	{  ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  47,  ER,  ER,  ER,  ER,  ER },
+	{  ENR,  ENR,	  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  47,  ER,  ER,  ER,  ER,  ER },
 
 	/* S29: Note continuation */
-	{   AS, ENR, ER,  ER,  30,  ER,  ER,  ER,  ER,  ER,  AS,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER },
+	{  AS,   ENR,	  ER,  ER,  30,  ER,  ER,  ER,  ER,  ER,  AS,  ER,  ER,  ER,  ER,  ER,  30,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER },
 
 	/* S30: '->' */
-	{  ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  31,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER },
+	{  ENR,  ENR,	  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  31,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER },
 
 	/* S31: Note -> complete */
-	{  ENR, ENR, ER,  ER,  32,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER },
+	{  ENR,  ENR,	  ER,  ER,  32,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER },
 
 	/* S32: '{' for note */
-	{  ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  33,  ER,  ER,  ER,  ER,  ER,  ER,  ER },
+	{  ENR,  ENR,	  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  33,  ER,  ER,  ER,  ER,  ER,  ER,  ER },
 
 	/* S33: Note dynamics */
-	{  ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  34,  ER,  ER,  ER,  ER,  ER },
+	{  ENR,  ENR,	  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  34,  ER,  ER,  ER,  ER,  ER },
 
 		/* S34: ',' */
-	{ ENR, ENR, ER,  ER,  ER,  35,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER },
+	{ ENR,   ENR,	  ER,  ER,  ER,  35,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER },
 
 		/* S35: Dynamics keyword */
-	{ ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  36,  ER,  ER,  ER,  ER,  ER },
+	{ ENR,   ENR,	  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  36,  ER,  ER,  ER,  ER,  ER },
 
 		/* S36: '}' */
-	{ ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  AS,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER },
+	{ ENR,	 ENR,	  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  AS,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER },
 
 		/* S37: Comment body */
-	{ ENR, ENR,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  38 },
+	{ ENR,	 ENR,	  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  37,  38 },
 
 		/* S38: Comment end */
-	{ AS, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  AS,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER },
+	{ AS,	 ENR,	  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  AS,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER },
 
 		/* S39: 'Pr' */
-	{ ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  40,  ER,  ER,  ER,  ER,  ER },
+	{ ENR,	 ENR,	  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  40,  ER,  ER,  ER,  ER,  ER },
 
 		/* S40: 'Pri' */
-	{ ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  41,  ER,  ER,  ER,  ER,  ER },
+	{ ENR,	 ENR,	  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  41,  ER,  ER,  ER,  ER,  ER },
 
 		/* S41: 'Prin' */
-	{ ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  42,  ER,  ER,  ER,  ER,  ER },
+	{ ENR,	 ENR,	  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  42,  ER,  ER,  ER,  ER,  ER },
 
 		/* S42: 'Print' complete */
-	{ ENR, ENR, ER,  ER,  ER,  ER,   6,  ER,  ER,  ER,  AS,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER },
+	{ ENR,	 ENR,	  ER,  ER,  ER,  ER,   6,  ER,  ER,  ER,  AS,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER },
 
 		/* S43: 'Te' */
-	{ ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  44,  ER,  ER,  ER,  ER,  ER },
+	{ ENR,	 ENR,	  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  44,  ER,  ER,  ER,  ER,  ER },
 
 		/* S44: 'Tem' */
-	{ ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  45,  ER,  ER,  ER,  ER,  ER },
+	{ ENR,	 ENR,	  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  45,  ER,  ER,  ER,  ER,  ER },
 
 		/* S45: 'Temp' */
-	{ ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  46,  ER,  ER,  ER,  ER,  ER },
+	{ ENR,	 ENR,	  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  46,  ER,  ER,  ER,  ER,  ER },
 
 		/* S46: 'Tempo' complete */
-	{ ENR, ENR, ER,  ER,  ER,  ER,   6,  ER,  ER,  ER,  AS,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER },
+	{ ENR,	 ENR,	  ER,  ER,  ER,  ER,   6,  ER,  ER,  ER,  AS,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER },
 
 		/* S47: 're' */
-	{ ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  48,  ER,  ER,  ER,  ER,  ER },
+	{ ENR,	 ENR,	  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  48,  ER,  ER,  ER,  ER,  ER },
 
 		/* S48: 'rep' */
-	{ ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  49,  ER,  ER,  ER,  ER,  ER },
+	{ ENR,	 ENR,	  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  49,  ER,  ER,  ER,  ER,  ER },
 
 		/* S49: 'repe' */
-	{ ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  50,  ER,  ER,  ER,  ER,  ER },
+	{ ENR,	 ENR,	  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  50,  ER,  ER,  ER,  ER,  ER },
 
 		/* S50: 'repea' */
-	{ ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  51,  ER,  ER,  ER,  ER,  ER },
+	{ ENR,	 ENR,	  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  51,  ER,  ER,  ER,  ER,  ER },
 
 		/* S51: 'repeat' */
-	{ ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  52,  ER,  ER,  ER,  ER,  ER },
+	{ ENR,	 ENR,	  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  52,  ER,  ER,  ER,  ER,  ER },
 
 		/* S52: 'repeati' */
-	{ ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  53,  ER,  ER,  ER,  ER,  ER },
+	{ ENR,	 ENR,	  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  53,  ER,  ER,  ER,  ER,  ER },
 
 		/* S53: 'repeatif' complete */
-	{ ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  54,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER },
+	{ ENR,	 ENR,	  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  54,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER },
 
 		/* S54: '<' */
-	{ ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  55,  ER,  ER,  ER,  ER,  ER },
+	{ ENR,	 ENR,	  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  55,  ER,  ER,  ER,  ER,  ER },
 
 		/* S55: Condition content */
-	{ ENR, ENR, ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  AS,  ER,  ER,  55,  55,  55,  ER,  ER,  ER,  ER }
+	{ ENR,	 ENR,	  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  AS,  ER,  ER,  55,  55,  55,  ER,  ER,  ER,  ER },
+
+	/* S56: NOTE */
+	{ AS,	 ENR,	  ER,  ER,  30,  ER,  ER,  29,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  ER,  AS,  ER,  ER,  55,  55,  55,  ER,  ER,  ER,  ER }
 
 };
 
@@ -428,13 +433,13 @@ static nl_int stateType[NUM_STATES] = {
 	NOFS, /* S10 */ FSNR, /* S11 */ NOFS, /* S12 */ NOFS, /* S13 */ NOFS, /* S14 */ // Variable complete
 	NOFS, /* S15 */ NOFS, /* S16 */ FSWR, /* S17 */ NOFS, /* S18 */ NOFS, /* S19 */ // 'section'
 	FSNR, /* S20 */ NOFS, /* S21 */ NOFS, /* S22 */ FSNR, /* S23 */ NOFS, /* S24 */ // Number, String
-	NOFS, /* S25 */ NOFS, /* S26 */ FSNR, /* S27 */ NOFS, /* S28 */ FSNR, /* S29 */ // Section complete, Note
-	NOFS, /* S30 */ NOFS, /* S31 */ NOFS, /* S32 */ NOFS, /* S33 */ NOFS, /* S34 */
+	NOFS, /* S25 */ NOFS, /* S26 */ FSNR, /* S27 */ NOFS, /* S28 */ NOFS, /* S29 */ // Section complete, Note
+	FSNR, /* S30 */ NOFS, /* S31 */ NOFS, /* S32 */ NOFS, /* S33 */ NOFS, /* S34 */
 	NOFS, /* S35 */ FSNR, /* S36 */ NOFS, /* S37 */ FSNR, /* S38 */ NOFS, /* S39 */ // Note complete, Comment
 	NOFS, /* S40 */ NOFS, /* S41 */ FSWR, /* S42 */ NOFS, /* S43 */ NOFS, /* S44 */ // 'Print'
 	NOFS, /* S45 */ FSWR, /* S46 */ NOFS, /* S47 */ NOFS, /* S48 */ NOFS, /* S49 */ // 'Tempo'
 	NOFS, /* S50 */ NOFS, /* S51 */ NOFS, /* S52 */ FSWR, /* S53 */ NOFS, /* S54 */ // 'repeatif'
-	FSNR  /* S55 */ // Condition complete
+	NOFS, /* S55 */ FSNR  /* S56 */ // Condition complete
 	/* Ensure NUM_STATES >= 56; add NOFS for S56-S58 if needed */
 };
 
@@ -484,13 +489,13 @@ static PTR_ACCFUN finalStateTable[NUM_STATES] = {
 	NULL,      /* S10 */ funcID,    /* S11 */ NULL,      /* S12 */ NULL,      /* S13 */ NULL,      /* S14 */ // Variable complete
 	NULL,      /* S15 */ NULL,      /* S16 */ funcKEY,   /* S17 */ NULL,      /* S18 */ NULL,      /* S19 */ // 'section'
 	funcIL,    /* S20 */ NULL,      /* S21 */ NULL,      /* S22 */ funcSL,    /* S23 */ NULL,      /* S24 */ // Number, String
-	NULL,      /* S25 */ NULL,      /* S26 */ funcID,    /* S27 */ NULL,      /* S28 */ funcNOTE,  /* S29 */ // Section complete, Note
-	NULL,      /* S30 */ NULL,      /* S31 */ NULL,      /* S32 */ NULL,      /* S33 */ NULL,      /* S34 */
+	NULL,      /* S25 */ NULL,      /* S26 */ funcID,    /* S27 */ NULL,      /* S28 */ NULL,  /* S29 */ // Section complete, Note
+	funcNOTE,      /* S30 */ NULL,      /* S31 */ NULL,      /* S32 */ NULL,      /* S33 */ NULL,      /* S34 */
 	NULL,      /* S35 */ funcNOTE,  /* S36 */ NULL,      /* S37 */ funcCMT,   /* S38 */ NULL,      /* S39 */ // Note, Comment
 	NULL,      /* S40 */ NULL,      /* S41 */ funcKEY,   /* S42 */ NULL,      /* S43 */ NULL,      /* S44 */ // 'Print'
 	NULL,      /* S45 */ funcKEY,   /* S46 */ NULL,      /* S47 */ NULL,      /* S48 */ NULL,      /* S49 */ // 'Tempo'
 	NULL,      /* S50 */ NULL,      /* S51 */ NULL,      /* S52 */ funcKEY,   /* S53 */ NULL,      /* S54 */ // 'repeatif'
-	funcKEY    /* S55 */ // Condition complete (repeaetif)
+	NULL,     /*  S55 */  funcNOTE   /* S56 */      // Condition complete
 };
 
 /*

@@ -446,7 +446,6 @@ nl_boln readerRetract(BufferPointer const readerPointer) {
 
 	/* Retract: move read position back one character */
 	readerPointer->positions.read--;
-	printf("Retract: Pos=%ld\n", readerPointer->positions.read);
 	return NL_TRUE; // Success
 }
 

@@ -436,11 +436,17 @@ nl_boln readerRecover(BufferPointer const readerPointer) {
 *************************************************************
 */
 nl_boln readerRetract(BufferPointer const readerPointer) {
-	/* TO_DO: Defensive programming */
-	if (!readerPointer)
-		return NL_ERROR;
-	/* TO_DO: Retract (return 1 pos read) */
-	return NL_TRUE;
+	/* Defensive programming */
+	if (!readerPointer) {
+		return NL_ERROR; // Null pointer
+	}
+	if (readerPointer->positions.read <= 0) {
+		return NL_ERROR; // Can't retract past start
+	}
+
+	/* Retract: move read position back one character */
+	readerPointer->positions.read--;
+	return NL_TRUE; // Success
 }
 
 

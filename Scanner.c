@@ -133,16 +133,15 @@ nl_int startScanner(BufferPointer psc_buf) {
  */
 
 Token tokenizer(nl_void) {
-    Token currentToken = { 0 }; /* Token to return */
-    nl_int c;                   /* Input symbol */
-    nl_int state = 0;           /* Initial state of the FSM */
-    nl_int lexStart;            /* Start offset of lexeme */
-    nl_int lexEnd;              /* End offset of lexeme */
-    nl_int lexLength;           /* Token length */
-    nl_int i;                   /* Counter */
-    nl_string lexeme;           /* Lexeme buffer */
+    Token currentToken = { 0 };
+    nl_int c;
+    nl_int state = 0;
+    nl_int lexStart;
+    nl_int lexEnd;
+    nl_int lexLength;
+    nl_int i;
+    nl_string lexeme;
 
-    /* Allocate lexeme buffer */
     lexeme = (nl_string)malloc(VID_LEN * sizeof(nl_char));
     if (!lexeme) {
         currentToken.code = ERR_T;
@@ -162,8 +161,45 @@ Token tokenizer(nl_void) {
             return currentToken;
         }
 
-        /* Check for # comments */
-        if (c == HASH_CHR) {
+        switch (c) {
+        case SPC_CHR:
+        case TAB_CHR:
+            break;
+        case NEWLINE_CHR:
+            line++;
+            break;
+        case SEMICOLON_CHR:
+            currentToken.code = EOS_T;
+            scData.scanHistogram[currentToken.code]++;
+            free(lexeme);
+            return currentToken;
+        case LPAREN_CHR:
+            currentToken.code = LPR_T;
+            scData.scanHistogram[currentToken.code]++;
+            free(lexeme);
+            return currentToken;
+        case RPAREN_CHR:
+            currentToken.code = RPR_T;
+            scData.scanHistogram[currentToken.code]++;
+            free(lexeme);
+            return currentToken;
+        case LBRACE_CHR:
+            currentToken.code = LBR_T;
+            scData.scanHistogram[currentToken.code]++;
+            free(lexeme);
+            return currentToken;
+        case RBRACE_CHR:
+            currentToken.code = RBR_T;
+            scData.scanHistogram[currentToken.code]++;
+            free(lexeme);
+            return currentToken;
+        case ASSIGN_CHR:
+            currentToken.code = ASSIGN_T;
+            scData.scanHistogram[currentToken.code]++;
+            free(lexeme);
+            return currentToken;
+        case HASH_CHR:
+            // ... (unchanged comment logic) ...
             readerSetMark(sourceBuffer, readerGetPosRead(sourceBuffer) - 1);
             lexStart = readerGetPosRead(sourceBuffer) - 1;
             state = 25; /* S25 */
@@ -217,109 +253,8 @@ Token tokenizer(nl_void) {
             readerFree(lexemeBuffer);
             free(lexeme);
             return currentToken;
-        }
-
-        /* Single-char tokens */
-        switch (c) {
-        case SPC_CHR:
-        case TAB_CHR:
-            break;
-        case NEWLINE_CHR:
-            line++;
-            break;
-        case SEMICOLON_CHR:
-            currentToken.code = EOS_T;
-            scData.scanHistogram[currentToken.code]++;
-            free(lexeme);
-            return currentToken;
-        case LPAREN_CHR:
-            currentToken.code = LPR_T;
-            scData.scanHistogram[currentToken.code]++;
-            free(lexeme);
-            return currentToken;
-        case RPAREN_CHR:
-            currentToken.code = RPR_T;
-            scData.scanHistogram[currentToken.code]++;
-            free(lexeme);
-            return currentToken;
-        case LBRACE_CHR:
-            currentToken.code = LBR_T;
-            scData.scanHistogram[currentToken.code]++;
-            free(lexeme);
-            return currentToken;
-        case RBRACE_CHR:
-            currentToken.code = RBR_T;
-            scData.scanHistogram[currentToken.code]++;
-            free(lexeme);
-            return currentToken;
-        case ASSIGN_CHR:
-            currentToken.code = ASSIGN_T;
-            scData.scanHistogram[currentToken.code]++;
-            free(lexeme);
-            return currentToken;
-        case LBRACKET_CHR:
-            currentToken.code = OP_LBRACKET_T;
-            scData.scanHistogram[currentToken.code]++;
-            free(lexeme);
-            return currentToken;
-        case RBRACKET_CHR:
-            currentToken.code = OP_RBRACKET_T;
-            scData.scanHistogram[currentToken.code]++;
-            free(lexeme);
-            return currentToken;
-        case LT_CHR:
-            currentToken.code = OP_LT_T;
-            scData.scanHistogram[currentToken.code]++;
-            free(lexeme);
-            return currentToken;
-        case GT_CHR:
-            currentToken.code = OP_GT_T;
-            scData.scanHistogram[currentToken.code]++;
-            free(lexeme);
-            return currentToken;
-        case COMMA_CHR:
-            currentToken.code = OP_COMMA_T;
-            scData.scanHistogram[currentToken.code]++;
-            free(lexeme);
-            return currentToken;
-        case DASH_CHR:
-            printf("DASH_CHR at Pos: %d\n", readerGetPosRead(sourceBuffer));
-            readerSetMark(sourceBuffer, readerGetPosRead(sourceBuffer) - 1);
-            nl_char next = readerGetChar(sourceBuffer);
-            printf("Next: %c at Pos: %d\n", next, readerGetPosRead(sourceBuffer));
-            if (next == GT_CHR) {
-                state = 30; /* S30 */
-                lexStart = readerGetPosRead(sourceBuffer) - 2;
-                lexEnd = readerGetPosRead(sourceBuffer);
-                lexLength = lexEnd - lexStart;
-                lexemeBuffer = readerCreate((nl_int)lexLength + 2, 0, MODE_FIXED);
-                readerRestore(sourceBuffer);
-                for (i = 0; i < lexLength; i++)
-                    readerAddChar(lexemeBuffer, readerGetChar(sourceBuffer));
-                readerAddChar(lexemeBuffer, READER_TERMINATOR);
-                lexeme = readerGetContent(lexemeBuffer, 0);
-                currentToken = funcNOTE(lexeme);
-                readerFree(lexemeBuffer);
-                free(lexeme);
-                return currentToken;
-            }
-            readerRestore(sourceBuffer);
-            currentToken.code = OP_SUB_T;
-            scData.scanHistogram[currentToken.code]++;
-            free(lexeme);
-            printf("Returning OP_SUB_T, Pos: %d\n", readerGetPosRead(sourceBuffer));
-            return currentToken;
-        case ASTERISK_CHR:
-            currentToken.code = OP_MUL_T;
-            scData.scanHistogram[currentToken.code]++;
-            free(lexeme);
-            return currentToken;
-        case SLASH_CHR:
-            currentToken.code = OP_DIV_T;
-            scData.scanHistogram[currentToken.code]++;
-            free(lexeme);
-            return currentToken;
         case QUOTE_CHR:
+            // ... (unchanged string logic) ...
             readerSetMark(sourceBuffer, readerGetPosRead(sourceBuffer) - 1);
             lexStart = readerGetPosRead(sourceBuffer) - 1;
             state = 23; /* S23 */
@@ -354,6 +289,34 @@ Token tokenizer(nl_void) {
             readerFree(lexemeBuffer);
             free(lexeme);
             return currentToken;
+        case DASH_CHR:
+            // ... (unchanged DASH_CHR logic) ...
+            printf("DASH_CHR at Pos: %d\n", readerGetPosRead(sourceBuffer));
+            readerSetMark(sourceBuffer, readerGetPosRead(sourceBuffer) - 1);
+            nl_char next = readerGetChar(sourceBuffer);
+            printf("Next: %c at Pos: %d\n", next, readerGetPosRead(sourceBuffer));
+            if (next == GT_CHR) {
+                state = 30; /* S30 */
+                lexStart = readerGetPosRead(sourceBuffer) - 2;
+                lexEnd = readerGetPosRead(sourceBuffer);
+                lexLength = lexEnd - lexStart;
+                lexemeBuffer = readerCreate((nl_int)lexLength + 2, 0, MODE_FIXED);
+                readerRestore(sourceBuffer);
+                for (i = 0; i < lexLength; i++)
+                    readerAddChar(lexemeBuffer, readerGetChar(sourceBuffer));
+                readerAddChar(lexemeBuffer, READER_TERMINATOR);
+                lexeme = readerGetContent(lexemeBuffer, 0);
+                currentToken = funcNOTE(lexeme);
+                readerFree(lexemeBuffer);
+                free(lexeme);
+                return currentToken;
+            }
+            readerRestore(sourceBuffer);
+            currentToken.code = OP_SUB_T;
+            scData.scanHistogram[currentToken.code]++;
+            free(lexeme);
+            printf("Returning OP_SUB_T, Pos: %d\n", readerGetPosRead(sourceBuffer));
+            return currentToken;
         case EXCLAMATION_CHR:
             readerSetMark(sourceBuffer, readerGetPosRead(sourceBuffer) - 1);
             lexStart = readerGetPosRead(sourceBuffer) - 1;
@@ -371,12 +334,7 @@ Token tokenizer(nl_void) {
                             readerAddChar(lexemeBuffer, readerGetChar(sourceBuffer));
                         readerAddChar(lexemeBuffer, READER_TERMINATOR);
                         lexeme = readerGetContent(lexemeBuffer, 0);
-                        currentToken = funcKEY("END");
-                        if (currentToken.code != KW_T) {
-                            currentToken.code = KW_T;
-                            currentToken.attribute.keywordIndex = 5; /* END at index 5 */
-                            scData.scanHistogram[currentToken.code]++;
-                        }
+                        currentToken = funcKEY("END"); // Pass "END" directly
                         readerFree(lexemeBuffer);
                         free(lexeme);
                         return currentToken;
@@ -389,62 +347,92 @@ Token tokenizer(nl_void) {
             scData.scanHistogram[currentToken.code]++;
             free(lexeme);
             return currentToken;
+        
+
         default:
             readerSetMark(sourceBuffer, readerGetPosRead(sourceBuffer) - 1);
             lexStart = readerGetPosRead(sourceBuffer) - 1;
+            lexEnd = 0;
             state = nextState(0, c);
 
-            /* Handle keyword branching at S1 */
-            if (state == 1) {
+            // Handle numbers
+            if (state == 20) {
+                while (state == 20) {
+                    c = readerGetChar(sourceBuffer);
+                    if (c == EOS_CHR || c < 0 || c >= NCHAR) break;
+                    if (c == NEWLINE_CHR) line++;
+                    nl_int nextCol = nextClass(c);
+                    if (nextCol != 19) {
+                        readerRetract(sourceBuffer);
+                        break;
+                    }
+                    state = nextState(state, c);
+                }
+            }
+            // Handle identifiers/keywords/notes
+            else if (state == 1 || state == 3) {
                 nl_int nextCol = nextClass(c);
-                if (nextCol == 20) { /* Col 20 (L) */
+                if (nextCol == 20 || nextCol == 21) {
                     switch (c) {
-                        case 'P': state = 13; break; /* Print */
-                        case 'd': state = 2;  break; /* df */
-                        case 's': state = 7;  break; /* section */
-                        case 'T': state = 15; break; /* Tempo */
-                        case 'r': state = 28; break; /* repeatif */
-                        default: state = 5;   break; /* Identifiers */
+                    case 'P': state = 13; break;
+                    case 'd': state = 2;  break;
+                    case 's': state = 7;  break;
+                    case 'T': state = 15; break;
+                    case 'r': state = 28; break;
+                    case 'A': case 'B': case 'C': case 'D': case 'E': case 'F': case 'G':
+                        state = 3; break;
+                    default: break;
+                    }
+                    while (stateType[state] == NOFS || state == 5) {
+                        c = readerGetChar(sourceBuffer);
+                        if (c == EOS_CHR || c < 0 || c >= NCHAR) break;
+                        if (c == NEWLINE_CHR) line++;
+                        nextCol = nextClass(c);
+                        if (nextCol != 20 && nextCol != 21) {
+                            nl_int tempPos = readerGetPosRead(sourceBuffer); // At delimiter
+                            if (stateType[state] == FSWR) {
+                                char nextChar = readerGetChar(sourceBuffer); // Peek
+                                if (nextChar == '(') {
+                                    lexEnd = tempPos - 1; // Before '('
+                                }
+                                else {
+                                    lexEnd = tempPos - 1; // Before delimiter
+                                }
+                                readerRetract(sourceBuffer); // Back from peek
+                            }
+                            else {
+                                readerRetract(sourceBuffer); // FSNR
+                                lexEnd = tempPos; // At last char
+                            }
+                            break;
+                        }
+                        state = nextState(state, c);
+                    }
+                    // Single-letter identifiers
+                    if (state == 1 && (nextCol != 20 && nextCol != 21)) {
+                        state = 5;
+                        lexEnd = readerGetPosRead(sourceBuffer); // At last char
                     }
                 }
             }
 
-            /* Process states until final or error */
-            while (stateType[state] == NOFS || state == ER || state == ENR) {
-                c = readerGetChar(sourceBuffer);
-                if (c == EOS_CHR || c < 0 || c >= NCHAR) break;
-                if (c == NEWLINE_CHR) line++;
-                nl_int nextCol = nextClass(c);
-                /* Stop at delimiters for keywords/identifiers */
-                if (nextCol == 23 || nextCol == 10 || nextCol == 6 || nextCol == 12) { /* Space, ;, =, " */
-                    readerRetract(sourceBuffer);
-                    break;
-                }
-                state = nextState(state, c);
-                if (stateType[state] == FSNR || stateType[state] == FSWR) break;
-            }
-
-            lexEnd = readerGetPosRead(sourceBuffer);
-            if (state == ER || state == ENR) {
-                lexLength = lexEnd - lexStart;
-                lexemeBuffer = readerCreate((nl_int)lexLength + 2, 0, MODE_FIXED);
-                readerRestore(sourceBuffer);
-                for (i = 0; i < lexLength; i++)
-                    readerAddChar(lexemeBuffer, readerGetChar(sourceBuffer));
-                readerAddChar(lexemeBuffer, READER_TERMINATOR);
-                lexeme = readerGetContent(lexemeBuffer, 0);
-                currentToken = funcErr(lexeme);
-                readerFree(lexemeBuffer);
-                free(lexeme);
-                return currentToken;
-            }
-
+            // Build token
             if (stateType[state] == FSNR || stateType[state] == FSWR) {
-                if (stateType[state] == FSWR) {
-                    readerRetract(sourceBuffer);
-                    lexEnd = readerGetPosRead(sourceBuffer);
+                if (lexEnd == 0) {
+                    lexEnd = readerGetPosRead(sourceBuffer); // At delimiter
                 }
                 lexLength = lexEnd - lexStart;
+                if (stateType[state] == FSNR) {
+                    lexLength++; // Include last char
+                }
+                printf("Debug: State=%d, lexLength=%ld, lexStart=%ld, lexEnd=%ld\n", state, lexLength, lexStart, lexEnd);
+                if (lexLength <= 0) {
+                    free(lexeme);
+                    currentToken.code = ERR_T;
+                    strcpy(currentToken.attribute.errLexeme, "Empty lexeme");
+                    scData.scanHistogram[currentToken.code]++;
+                    return currentToken;
+                }
                 lexemeBuffer = readerCreate((nl_int)lexLength + 2, 0, MODE_FIXED);
                 if (!lexemeBuffer) {
                     free(lexeme);
@@ -454,19 +442,32 @@ Token tokenizer(nl_void) {
                     return currentToken;
                 }
                 readerRestore(sourceBuffer);
-                for (i = 0; i < lexLength; i++)
-                    readerAddChar(lexemeBuffer, readerGetChar(sourceBuffer));
+                for (i = 0; i < lexLength; i++) {
+                    char ch = readerGetChar(sourceBuffer);
+                    if (ch == EOS_CHR || ch < 0 || ch >= NCHAR) break;
+                    readerAddChar(lexemeBuffer, ch);
+                }
                 readerAddChar(lexemeBuffer, READER_TERMINATOR);
                 lexeme = readerGetContent(lexemeBuffer, 0);
+                printf("Debug: State=%d, Lexeme=%s, Length=%ld, lexStart=%ld, lexEnd=%ld\n",
+                    state, lexeme, lexLength, lexStart, lexEnd);
                 currentToken = (finalStateTable[state] != NULL) ? (*finalStateTable[state])(lexeme) : funcErr(lexeme);
                 readerFree(lexemeBuffer);
                 free(lexeme);
                 return currentToken;
             }
+            else {
+                lexEnd = readerGetPosRead(sourceBuffer);
+                free(lexeme);
+                currentToken.code = ERR_T;
+                strcpy(currentToken.attribute.errLexeme, "Invalid token");
+                scData.scanHistogram[currentToken.code]++;
+                return currentToken;
+            }
             break;
-        } // switch
-    } // while
-} // tokenizer
+        }
+    }
+}
 
 
 /*
@@ -578,19 +579,23 @@ nl_int nextClass(nl_char c) {
  /* TO_DO: Adjust the function for IL */
 
 Token funcCMT(nl_string lexeme) {
+    Token currentToken = { 0 };
+    nl_int len = (nl_int)strlen(lexeme);
 
-	Token currentToken = { 0 };
-	nl_int len = (nl_int)strlen(lexeme);
-	if (len < 3 || lexeme[0] != HASH_CHR || lexeme[len - 1] != HASH_CHR) {
-		printf("Comment rejected: %s\n", lexeme);
-		return funcErr(lexeme);
-	}
-	for (nl_int i = 0; i < len; i++) {
-		if (lexeme[i] == NEWLINE_CHR) line++;
-	}
-	currentToken.code = CMT_T;
-	scData.scanHistogram[currentToken.code]++;
-	return currentToken;
+    if (len < 3 || lexeme[0] != HASH_CHR || lexeme[len - 1] != HASH_CHR) {
+        printf("Comment rejected: %s\n", lexeme);
+        return funcErr(lexeme);
+    }
+
+    for (nl_int i = 0; i < len; i++) {
+        if (lexeme[i] == NEWLINE_CHR) line++;
+    }
+
+    currentToken.code = CMT_T;
+    strncpy(currentToken.attribute.errLexeme, lexeme, ERR_LEN); /* Store lexeme */
+    currentToken.attribute.errLexeme[ERR_LEN - 1] = EOS_CHR;    /* Ensure null-terminated */
+    scData.scanHistogram[currentToken.code]++;
+    return currentToken;
 }
 
 
@@ -607,16 +612,15 @@ Token funcCMT(nl_string lexeme) {
   /* TO_DO: Adjust the function for IL */
 
 Token funcIL(nl_string lexeme) {
-	Token currentToken = { 0 };
-	nl_long tlong = atol(lexeme);
-	if (strlen(lexeme) > NUM_LEN || tlong < 0 || tlong > SHRT_MAX) {
-		return funcErr(lexeme);
-	}
-	currentToken.code = INL_T;
-	currentToken.attribute.intValue = (nl_int)tlong;
-	scData.scanHistogram[currentToken.code]++;
-	printf("Number: %s, Value: %d\n", lexeme, currentToken.attribute.intValue); /* Debug */
-	return currentToken;
+    Token currentToken = { 0 };
+    nl_long tlong = atol(lexeme);
+    if (strlen(lexeme) > NUM_LEN || tlong < 0 || tlong > SHRT_MAX) {
+        return funcErr(lexeme);
+    }
+    currentToken.code = INL_T;
+    currentToken.attribute.intValue = (nl_int)tlong;
+    scData.scanHistogram[currentToken.code]++;
+    return currentToken;
 }
 
 
@@ -635,13 +639,25 @@ Token funcIL(nl_string lexeme) {
  /* TO_DO: Adjust the function for ID */
 
 Token funcID(nl_string lexeme) {
-	Token currentToken = { 0 };
-	currentToken = funcKEY(lexeme);
-	if (currentToken.code == VID_T) {
-		strncpy(currentToken.attribute.idLexeme, lexeme, VID_LEN);
-		currentToken.attribute.idLexeme[VID_LEN] = EOS_CHR;
-	}
-	return currentToken;
+    Token currentToken = { 0 };
+    nl_int kwindex = -1;
+    for (nl_int j = 0; j < KWT_SIZE; j++) {
+        if (strcmp(lexeme, keywordTable[j]) == 0) {
+            kwindex = j;
+            break;
+        }
+    }
+    if (kwindex != -1) {
+        currentToken.code = KW_T;
+        currentToken.attribute.keywordIndex = kwindex;
+    }
+    else {
+        currentToken.code = VID_T;
+        strncpy(currentToken.attribute.idLexeme, lexeme, VID_LEN);
+        currentToken.attribute.idLexeme[VID_LEN - 1] = EOS_CHR;
+    }
+    scData.scanHistogram[currentToken.code]++;
+    return currentToken;
 }
 
 
@@ -659,26 +675,26 @@ Token funcID(nl_string lexeme) {
 /* TO_DO: Adjust the function for SL */
 
 Token funcSL(nl_string lexeme) {
-	Token currentToken = { 0 };
-	nl_int i, len = (nl_int)strlen(lexeme);
-	if (len < 2 || lexeme[0] != QUOTE_CHR || lexeme[len - 1] != QUOTE_CHR) {
-		printf("String rejected: %s\n", lexeme);
-		return funcErr(lexeme);
-	}
-	currentToken.attribute.contentString = readerGetPosWrte(stringLiteralTable);
-	for (i = 1; i < len - 1; i++) {
-		if (lexeme[i] == NEWLINE_CHR) line++;
-		if (!readerAddChar(stringLiteralTable, lexeme[i])) {
-			currentToken.code = RTE_T;
-			strcpy(currentToken.attribute.errLexeme, "Run Time Error:");
-			errorNumber = RTE_CODE;
-			return currentToken;
-		}
-	}
-	readerAddChar(stringLiteralTable, EOS_CHR);
-	currentToken.code = STR_T;
-	scData.scanHistogram[currentToken.code]++;
-	return currentToken;
+    Token currentToken = { 0 };
+    nl_int i, len = (nl_int)strlen(lexeme);
+    if (len < 2 || lexeme[0] != QUOTE_CHR || lexeme[len - 1] != QUOTE_CHR) {
+        printf("String rejected: %s\n", lexeme);
+        return funcErr(lexeme);
+    }
+    currentToken.attribute.contentString = readerGetPosWrte(stringLiteralTable);
+    for (i = 1; i < len - 1; i++) {
+        if (lexeme[i] == NEWLINE_CHR) line++;
+        if (!readerAddChar(stringLiteralTable, lexeme[i])) {
+            currentToken.code = RTE_T;
+            strcpy(currentToken.attribute.errLexeme, "Run Time Error:");
+            errorNumber = RTE_CODE;
+            return currentToken;
+        }
+    }
+    readerAddChar(stringLiteralTable, EOS_CHR); /* Ensure null terminator */
+    currentToken.code = STR_T;
+    scData.scanHistogram[currentToken.code]++;
+    return currentToken;
 }
 
 
@@ -763,7 +779,9 @@ nl_void printToken(Token t) {
 
 	switch (t.code) {
 	case ERR_T: printf("ERR_T\t\t%s\n", t.attribute.errLexeme); break;
-	case VID_T: printf("VID_T\t\t%s\n", t.attribute.idLexeme); break;
+    case VID_T:
+        printf("VID_T\t\t%s\n", t.attribute.idLexeme[0] ? t.attribute.idLexeme : "[empty]");
+        break;
 	case INL_T: printf("INL_T\t\t%d\n", t.attribute.intValue); break;
 	case STR_T: printf("STR_T\t\t%d\t%s\n", t.attribute.contentString,
 		readerGetContent(stringLiteralTable, t.attribute.contentString)); break;
@@ -789,7 +807,9 @@ nl_void printToken(Token t) {
 	case OP_LT_T: printf("OP_LT_T\t\t<\n"); break;
 	case OP_GT_T: printf("OP_GT_T\t\t>\n"); break;
 	case OP_COMMA_T: printf("OP_COMMA_T\t\t,\n"); break;
-	case CMT_T: printf("CMT_T\n"); break;
+    case CMT_T:
+        printf("CMT_T\t\t%s\n", t.attribute.errLexeme);
+        break;
 	case SEOF_T: printf("SEOF_T\t\t%d\n", t.attribute.seofType); break;
 	default: printf("Scanner error: invalid token code: %d\n", t.code); break;
 	}

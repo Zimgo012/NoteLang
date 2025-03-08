@@ -196,7 +196,7 @@ typedef struct scannerData {
 } ScannerData, * pScanData;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
-
+		
 /* TO_DO: Define lexeme FIXED classes */
 /* EOF definitions */
 #define EOS_CHR        '\0'   /* CH00 - End of string */
@@ -422,7 +422,7 @@ static nl_int transitionTable[NUM_STATES][CHAR_CLASSES] = {
 /* TO_DO: Define list of acceptable states */
 static nl_int stateType[NUM_STATES] = {
 	NOFS, /* S0 */  NOFS, /* S1 */  NOFS, /* S2 */  NOFS, /* S3 */  FSWR, /* S4 */  // 'df'
-	NOFS, /* S5 */  NOFS, /* S6 */  NOFS, /* S7 */  NOFS, /* S8 */  NOFS, /* S9 */  // Variable, P for Print
+	FSWR, /* S5 */  NOFS, /* S6 */  NOFS, /* S7 */  NOFS, /* S8 */  NOFS, /* S9 */  // Variable, P for Print
 	NOFS, /* S10 */ FSNR, /* S11 */ NOFS, /* S12 */ NOFS, /* S13 */ NOFS, /* S14 */ // Variable complete
 	NOFS, /* S15 */ NOFS, /* S16 */ FSWR, /* S17 */ NOFS, /* S18 */ NOFS, /* S19 */ // 'section'
 	FSNR, /* S20 */ NOFS, /* S21 */ NOFS, /* S22 */ FSNR, /* S23 */ NOFS, /* S24 */ // Number, String
@@ -478,7 +478,7 @@ Token funcNOTE(nl_string lxeme);
 /* TO_DO: Define final state table */
 static PTR_ACCFUN finalStateTable[NUM_STATES] = {
 	NULL,      /* S0 */  NULL,      /* S1 */  NULL,      /* S2 */  NULL,      /* S3 */ funcKEY,   /* S4 */  // 'df'
-	NULL,    /* S5 */  NULL,      /* S6 */  NULL,      /* S7 */  NULL,      /* S8 */  NULL,      /* S9 */  // Variable or 'Print' start
+	funcID,    /* S5 */  NULL,      /* S6 */  NULL,      /* S7 */  NULL,      /* S8 */  NULL,      /* S9 */  // Variable or 'Print' start
 	NULL,      /* S10 */ funcID,    /* S11 */ NULL,      /* S12 */ NULL,      /* S13 */ NULL,      /* S14 */ // Variable complete
 	NULL,      /* S15 */ NULL,      /* S16 */ funcKEY,   /* S17 */ NULL,      /* S18 */ NULL,      /* S19 */ // 'section'
 	funcIL,    /* S20 */ NULL,      /* S21 */ NULL,      /* S22 */ funcSL,    /* S23 */ NULL,      /* S24 */ // Number, String

@@ -69,7 +69,7 @@
 #define RTE_CODE 1  /* Value for run-time error */
 
 /* TO_DO: Define the number of tokens */
-#define NUM_TOKENS 26
+#define NUM_TOKENS 27
 
 /* TO_DO: Define Token codes - Create your token classes */
 enum TOKENS {
@@ -99,6 +99,7 @@ enum TOKENS {
 	CMT_T,			/* 23: Comment token (/** ... **/ 
 	SEOF_T,			/* 24: Source end-of-file token */
 	RTE_T,			/* 25: Run-time error token */
+	NOTE_T			/* 26: Note Token*/
 };
 
 /* TO_DO: Define the list of keywords */
@@ -127,8 +128,9 @@ static nl_string tokenStrTable[NUM_TOKENS] = {
 	"OP_GT_T",       /* 21: Greater-than operator (>) */
 	"OP_COMMA_T",    /* 22: Comma ( , ) */
 	"CMT_T",         /* 23: Comment token (/** ... / */
-	"SEOF_T"         /* 24: Source end-of-file token */
-	"RTE_T"			 /* 25: Run-time error token */
+	"SEOF_T",         /* 24: Source end-of-file token */
+	"RTE_T",		 /* 25: Run-time error token */
+	"NOTE_T"
 };
 
 /* TO_DO: Operators token attributes */

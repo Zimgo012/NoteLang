@@ -1,0 +1,19 @@
+# Sample code of NOTELANG # 
+# Sample code of NOTELANG # 
+# Sample 
+code of NOTELANG! # 
+df x = "this is a test";
+df y = 3;
+df a= "another test";
+section main(){
+
+C4 -> {1,ff};
+A5 -> {1,mf};
+B2 -> {1,fff};
+a2 -> {1,ff}; #error token expected#
+
+#End of section #
+};
+
+# End of File #
+!END

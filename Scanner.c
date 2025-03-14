@@ -804,7 +804,7 @@ nl_void printToken(Token t) {
     case OP_COMMA_T: printf("OP_COMMA_T\t\t,\n"); break;
     case CMT_T: printf("CMT_T\t\t%s\n", t.attribute.errLexeme); break;
     case SEOF_T: printf("SEOF_T\t\t%d\n", t.attribute.seofType); break;
-    case NOTE_T: printf("NOTE_T\t\t%s\n", t.attribute.idLexeme); break; // Added for NOTE_T
+    case NOTE_T: printf("NOTE_T\t\t%s\n", t.attribute.idLexeme); break;
     default: printf("Scanner error: invalid token code: %d\n", t.code); break;
     }
 }
@@ -836,7 +836,6 @@ TO_DO: (If necessary): HERE YOU WRITE YOUR ADDITIONAL FUNCTIONS (IF ANY).
 
 
 /* Marks end of file */
-
 Token funcSEOF(nl_string lexeme) {
 	Token currentToken = { 0 };
 	nl_int len = (nl_int)strlen(lexeme);

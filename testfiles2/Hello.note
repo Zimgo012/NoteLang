@@ -1,0 +1,11 @@
+#This is a comment #
+section hello(){
+    Tempo t = 120;
+    #C4 -> { 1 , ff };#
+    Print "Hello, NoteLang!";
+    df x = "test";
+
+};    
+
+
+!END

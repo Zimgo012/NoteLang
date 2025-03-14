@@ -9,7 +9,7 @@
       "name": "NoteLang.exe",
       "args": [
         "2",
-        "NoteTest.note",
+        "INPUT6_Altogether.note",
         "m",
         "400",
         "20"

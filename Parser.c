@@ -347,7 +347,6 @@ nl_void varDeclaration() {
     matchToken(VID_T, NO_ATTR);   // Match variable identifier (code 1)
     matchToken(ASSIGN_T, NO_ATTR);// Match "=" (code 10)
 
-    // Match either a string literal or integer literal
     if (lookahead.code == STR_T) {
         matchToken(STR_T, NO_ATTR); // Match string (code 3)
     }
@@ -361,7 +360,6 @@ nl_void varDeclaration() {
         return;
     }
 
-    // Ensure EOS_T is present
     if (lookahead.code != EOS_T) {
         printf("%s%s\n", STR_LANGNAME, ": Error: Expected ';' at end of variable declaration");
         printError();
@@ -383,41 +381,22 @@ nl_void varDeclaration() {
 nl_void codeSession() {
     psData.parsHistogram[BNF_codeSession]++;
     printf("DEBUG: Entering codeSession, lookahead.code = %d\n", lookahead.code);
-    int hasMain = 0;
-    while (lookahead.code != SEOF_T) {
+
+    // Loop until SEOF_T or KW_END is encountered
+    while (lookahead.code != SEOF_T &&
+        !(lookahead.code == KW_T && lookahead.attribute.codeType == KW_END)) {
         printf("DEBUG: codeSession loop, lookahead.code = %d\n", lookahead.code);
-        switch (lookahead.code) {
-        case CMT_T:
-            comment();
-            break;
-        case KW_T:
-            if (lookahead.attribute.codeType == KW_section) {
-                matchToken(KW_T, KW_section);
-                if (strcmp(lookahead.attribute.idLexeme, "main") == 0) {
-                    hasMain = 1;
-                }
-                matchToken(VID_T, NO_ATTR);
-                matchToken(LPR_T, NO_ATTR);
-                matchToken(RPR_T, NO_ATTR);
-                matchToken(LBR_T, NO_ATTR);
-                noteStatements();
-                matchToken(RBR_T, NO_ATTR);
-                matchToken(EOS_T, NO_ATTR);
-                printf("%s%s\n", STR_LANGNAME, ": Section parsed");
-            }
-            else {
-                goto exit_code;
-            }
-            break;
-        default:
-            goto exit_code;
-        }
+        matchToken(KW_T, KW_section); // Match "section" (code 8, attribute 1)
+        matchToken(VID_T, NO_ATTR);   // Match section name (e.g., "main")
+        matchToken(LPR_T, NO_ATTR);   // Match "("
+        matchToken(RPR_T, NO_ATTR);   // Match ")"
+        matchToken(LBR_T, NO_ATTR);   // Match "{"
+        noteStatements();
+        matchToken(RBR_T, NO_ATTR);   // Match "}"
+        matchToken(EOS_T, NO_ATTR);   // Match ";"
+        printf("%s%s\n", STR_LANGNAME, ": Section parsed");
     }
-exit_code:
-    if (!hasMain) {
-        printf("%s%s\n", STR_LANGNAME, ": Error: Code session requires a 'main' section");
-        printError();
-    }
+
     printf("DEBUG: Leaving codeSession, lookahead.code = %d\n", lookahead.code);
     printf("%s%s\n", STR_LANGNAME, ": Code session parsed");
 }
@@ -432,20 +411,21 @@ exit_code:
 nl_void noteStatements() {
     psData.parsHistogram[BNF_noteStatements]++;
     printf("DEBUG: Entering noteStatements, lookahead.code = %d\n", lookahead.code);
+
     while (lookahead.code != RBR_T && lookahead.code != SEOF_T) {
         printf("DEBUG: noteStatements loop, lookahead.code = %d\n", lookahead.code);
         switch (lookahead.code) {
-        case CMT_T:
-            comment();
-            break;
         case NOTE_T:
             noteStatement();
             break;
         default:
+            printf("%s%s%d\n", STR_LANGNAME, ": Error: Unexpected token in note statements, code = ", lookahead.code);
             printError();
-            lookahead = tokenizer();
+            syncErrorHandler(BNF_noteStatements);
+            return;
         }
     }
+
     printf("DEBUG: Leaving noteStatements, lookahead.code = %d\n", lookahead.code);
     printf("%s%s\n", STR_LANGNAME, ": Note statements parsed");
 }
@@ -460,14 +440,29 @@ nl_void noteStatements() {
 nl_void noteStatement() {
     psData.parsHistogram[BNF_noteStatement]++;
     printf("DEBUG: Entering noteStatement, lookahead.code = %d\n", lookahead.code);
-    matchToken(NOTE_T, NO_ATTR);
-    matchToken(OP_NOTE_T, NO_ATTR);
-    matchToken(LBR_T, NO_ATTR);
-    matchToken(INL_T, NO_ATTR);
-    matchToken(OP_COMMA_T, NO_ATTR);
-    matchToken(KW_T, NO_ATTR); // ff, mf, fff
-    matchToken(RBR_T, NO_ATTR);
-    matchToken(EOS_T, NO_ATTR);
+
+    matchToken(NOTE_T, NO_ATTR);      // Match note (e.g., C4) (code 26)
+    matchToken(OP_NOTE_T, NO_ATTR);   // Match "->" (code 11)
+    matchToken(LBR_T, NO_ATTR);       // Match "{" (code 6)
+    matchToken(INL_T, NO_ATTR);       // Match duration (e.g., 1) (code 2)
+
+    // Match dynamic marking (mf, f, ff, fff)
+    if (lookahead.code == KW_T && (lookahead.attribute.codeType == KW_mf ||
+        lookahead.attribute.codeType == KW_f ||
+        lookahead.attribute.codeType == KW_ff ||
+        lookahead.attribute.codeType == KW_fff)) {
+        matchToken(KW_T, lookahead.attribute.codeType); // Match specific dynamic keyword
+    }
+    else {
+        printf("%s%s\n", STR_LANGNAME, ": Error: Expected dynamic marking (mf, f, ff, fff)");
+        printError();
+        syncErrorHandler(BNF_noteStatement);
+        return;
+    }
+
+    matchToken(RBR_T, NO_ATTR);       // Match "}" (code 7)
+    matchToken(EOS_T, NO_ATTR);       // Match ";" (code 9)
+
     printf("%s%s\n", STR_LANGNAME, ": Note statement parsed");
 }
 

@@ -8,10 +8,10 @@
       "projectTarget": "NoteLang.exe",
       "name": "NoteLang.exe",
       "args": [
-        "2",
-        "INPUT6_Altogether.note",
+        "3",
+        "TestMe.note",
         "m",
-        "400",
+        "500",
         "20"
       ]
     }

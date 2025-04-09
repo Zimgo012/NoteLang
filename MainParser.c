@@ -1,39 +1,5 @@
 /*
 ************************************************************
-* COMPILERS COURSE - Algonquin College
-* Code version: Fall, 2024
-* Author: TO_DO
-* Professors: Paulo Sousa
-************************************************************
-#
-# ECHO "=---------------------------------------="
-# ECHO "|  COMPILERS - ALGONQUIN COLLEGE (F24)  |"
-# ECHO "=---------------------------------------="
-# ECHO "    @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@    ”
-# ECHO "    @@                             @@    ”
-# ECHO "    @@           %&@@@@@@@@@@@     @@    ”
-# ECHO "    @@       @%% (@@@@@@@@@  @     @@    ”
-# ECHO "    @@      @& @   @ @       @     @@    ”
-# ECHO "    @@     @ @ %  / /   @@@@@@     @@    ”
-# ECHO "    @@      & @ @  @@              @@    ”
-# ECHO "    @@       @/ @*@ @ @   @        @@    ”
-# ECHO "    @@           @@@@  @@ @ @      @@    ”
-# ECHO "    @@            /@@    @@@ @     @@    ”
-# ECHO "    @@     @      / /     @@ @     @@    ”
-# ECHO "    @@     @ @@   /@/   @@@ @      @@    ”
-# ECHO "    @@     @@@@@@@@@@@@@@@         @@    ”
-# ECHO "    @@                             @@    ”
-# ECHO "    @@         S O F I A           @@    ”
-# ECHO "    @@                             @@    ”
-# ECHO "    @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@    ”
-# ECHO "                                         "
-# ECHO "[READER SCRIPT .........................]"
-# ECHO "                                         "
-*/
-
-
-/*
-************************************************************
 * File name: MainParser.c
 * Compiler: MS Visual Studio 2022
 * Course: CST 8152 – Compilers, Lab Section: [011, 012, 013]
@@ -41,28 +7,16 @@
 * Date: May 01 2023
 * Professor: Paulo Sousa
 * Purpose: This file is the main code for Parser (A32)
-* Function list: (...).
 ************************************************************
 */
-
-/*
-************************************************************
- * IMPORTANT NOTE:
- * The #define _CRT_SECURE_NO_WARNINGS should be used in MS Visual Studio projects
- * to suppress the warnings about using "unsafe" functions like fopen()
- * and standard sting library functions defined in string.h.
- * The define does not have any effect in other compilers  projects.
- *********************************************************
- */
-
 
 #define _CRT_SECURE_NO_WARNINGS
 
 #include <stdio.h>
-#include <stdlib.h> /* Constants for calls to exit()*/
-
+#include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
+#include <ctype.h>
 
 #ifndef COMPILERS_H_
 #include "Compilers.h"
@@ -80,37 +34,17 @@
 #include "Parser.h"
 #endif
 
- /* Check for ANSI C compliancy */
-#define ANSI_C 0
-#if defined(__STDC__)
-#undef ANSI_C
-#define ANSI_C 1
-#endif
-
-/*
- * -------------------------------------------------------------
- *  Global vars and External vars
- * -------------------------------------------------------------
- */
-
- /* Global objects - variables */
-static BufferPointer sourceBuffer; /* pointer to input (source) buffer */
-BufferPointer stringLiteralTable; /* This buffer is used as a repository for string literals */
-nl_int errorNumber;     /* Run-time error number = 0 by default (ANSI) */
+/* Global objects - variables */
+static BufferPointer sourceBuffer;
+BufferPointer stringLiteralTable;
+nl_int errorNumber = 0;
 
 /* External objects */
-extern nl_int syntaxErrorNumber /* number of syntax errors reported by the parser */;
-extern nl_int line; /* source code line number - defined in scanner.c */
-
+extern nl_int syntaxErrorNumber;
+extern nl_int line;
 extern ParserData psData;
 
-/*
- * -------------------------------------------------------------
- *  Function declarations
- * -------------------------------------------------------------
- */
-
- /* Function declarations (prototypes) */
+/* Function declarations */
 extern nl_void startParser(sofia_void);
 extern nl_int startScanner(BufferPointer sc_buf);
 
@@ -118,166 +52,192 @@ static nl_void printParserError(nl_string fmt, ...);
 static nl_void displayParser(BufferPointer ptrBuffer);
 static nl_long getParserFileSize(nl_string fname);
 static nl_void callGarbageCollector(sofia_void);
+static nl_int isNumber(const nl_string ns);
 
 /*
 ************************************************************
- *  Parser Main function
- *  Parameters:
- *  - argc / argv = Parameters from command prompt
- *  Return value:
- *	- Success operation.
-***********************************************************
+* Parser Main function
+************************************************************
 */
-
 nl_int mainParser(nl_int argc, nl_string* argv) {
+    numParserErrors = 0;
+    FILE* fi;
+    nl_int loadsize = 0;
+    nl_string program = argv[0];
+    nl_string input = argv[2];
+    nl_char mode = MODE_MULTI;  // Default mode
+    nl_int bufferSize = READER_DEFAULT_SIZE;
+    nl_int bufferIncrement = READER_DEFAULT_INCREMENT;
+    nl_int wrongNumber = 0;
 
-	numParserErrors = 0;			/* Initializes the errors */
+    /* Check for minimum arguments */
+    if (argc <= 2) {
+        printParserError("\nDate: %s  Time: %s", __DATE__, __TIME__);
+        printParserError("\nRuntime error at line %d in file %s\n", __LINE__, __FILE__);
+        printParserError("%s%s", program, ": Missing parameters.");
+        printParserError("Usage: %s <Option=2> <SourceFile> [<Mode> <Size> <Increment>]", program);
+        exit(EXIT_FAILURE);
+    }
 
-	FILE* fi;       /* input file handle */
-	nl_int loadsize = 0; /*the size of the file loaded in the buffer */
+    /* Parse additional arguments */
+    if (argc >= 4) {
+        mode = *argv[3];
+        switch (mode) {
+        case MODE_FIXED:
+        case MODE_ADDIT:
+        case MODE_MULTI:
+            break;
+        default:
+            printParserError("%s%s%c%s%c%s%c%s", program, ": Wrong mode - choose: ",
+                MODE_FIXED, ", ", MODE_ADDIT, ", ", MODE_MULTI, ".");
+            exit(EXIT_FAILURE);
+        }
+    }
+    if (argc == 6) {
+        mode = *argv[3];
+        if (isNumber(argv[4])) {
+            bufferSize = atoi(argv[4]);
+            if (bufferSize <= 0) bufferSize = READER_DEFAULT_SIZE;
+        }
+        else {
+            wrongNumber = 1;
+        }
+        if (isNumber(argv[5])) {
+            bufferIncrement = atoi(argv[5]);
+            if (bufferIncrement <= 0) bufferIncrement = READER_DEFAULT_INCREMENT;
+        }
+        else {
+            wrongNumber = 1;
+        }
+        if (wrongNumber) {
+            printParserError("\nDate: %s  Time: %s", __DATE__, __TIME__);
+            printParserError("\nRuntime error at line %d in file %s\n", __LINE__, __FILE__);
+            printParserError("%s%s", program, ": Missing or wrong number parameters.");
+            printParserError("Usage: %s <Option=2> <SourceFile> [<Mode> <Size> <Increment>]", program);
+            exit(EXIT_FAILURE);
+        }
+    }
 
-	/*check for correct arrguments - source file name */
-	if (argc <= 1) {
-		/* __DATE__, __TIME__, __LINE__, __FILE__ are predefined preprocessor macros*/
-		printParserError("Date: %s  Time: %s", __DATE__, __TIME__);
-		printParserError("Runtime error at line %d in file %s", __LINE__, __FILE__);
-		printParserError("%s%s%s", argv[0], ": ", "Missing source file name.");
-		printParserError("%s%s%s", "Usage: ", "parser", "  source_file_name");
-		exit(EXIT_FAILURE);
-	}
+    /* Create source buffer with custom settings */
+    sourceBuffer = readerCreate(bufferSize, bufferIncrement, mode);
+    if (sourceBuffer == NULL) {
+        printParserError("%s%s%s", program, ": ", "Could not create source buffer");
+        exit(EXIT_FAILURE);
+    }
 
-	/* create a source code input buffer - multiplicative mode */
-	sourceBuffer = readerCreate(READER_DEFAULT_SIZE, READER_DEFAULT_INCREMENT, MODE_MULTI);
-	if (sourceBuffer == NULL) {
-		printParserError("%s%s%s", argv[0], ": ", "Could not create source buffer");
-		exit(EXIT_FAILURE);
-	}
+    /* Open source file */
+    if ((fi = fopen(input, "r")) == NULL) {
+        printParserError("%s%s%s%s", program, ": ", "Cannot open file: ", input);
+        exit(EXIT_FAILURE);
+    }
 
-	/*open source file */
-	if ((fi = fopen(argv[2], "r")) == NULL) {
-		printParserError("%s%s%s%s", argv[0], ": ", "Cannot open file: ", argv[2]);
-		exit(EXIT_FAILURE);
-	}
+    /* Load source file */
+    printf("Reading file %s ....Please wait\n", input);
+    loadsize = readerLoad(sourceBuffer, fi);
+    if (loadsize == -1) {
+        printParserError("%s%s%s", program, ": ", "Error in loading buffer.");
+    }
+    fclose(fi);
 
-	/* load source file into input buffer  */
-	printf("Reading file %s ....Please wait\n", argv[2]);
-	loadsize = readerLoad(sourceBuffer, fi);
-	if (loadsize == -1)
-		printParserError("%s%s%s", argv[0], ": ", "Error in loading buffer.");
+    if (loadsize == -1) {
+        printf("The input file %s %s\n", input, "is not completely loaded.");
+        printf("Input file size: %ld\n", getParserFileSize(input));
+    }
 
-	/* close source file */
-	fclose(fi);
-	/*find the size of the file  */
-	if (loadsize == -1) {
-		printf("The input file %s %s\n", argv[2], "is not completely loaded.");
-		printf("Input file size: %ld\n", getParserFileSize(argv[2]));
-	}
-	/* Add SEOF (EOF) to input buffer and display the source buffer */
-	if ((loadsize != -1) && (loadsize != 0)) {
-		if (readerAddChar(sourceBuffer, READER_TERMINATOR)) {
-			displayParser(sourceBuffer);
-		}
-	}
-	/* create string Literal Table */
-	stringLiteralTable = readerCreate(READER_DEFAULT_SIZE, READER_DEFAULT_INCREMENT, MODE_ADDIT);
-	if (stringLiteralTable == NULL) {
-		printParserError("%s%s%s", argv[0], ": ", "Could not create string literal buffer");
-		exit(EXIT_FAILURE);
-	}
+    if ((loadsize != -1) && (loadsize != 0)) {
+        if (readerAddChar(sourceBuffer, READER_TERMINATOR)) {
+            displayParser(sourceBuffer);
+        }
+    }
 
-	/* Registrer exit function */
-	atexit(callGarbageCollector);
+    /* Create string literal table */
+    stringLiteralTable = readerCreate(bufferSize, bufferIncrement, MODE_ADDIT);
+    if (stringLiteralTable == NULL) {
+        printParserError("%s%s%s", program, ": ", "Could not create string literal buffer");
+        exit(EXIT_FAILURE);
+    }
 
-	/* Initialize scanner  */
-	startScanner(sourceBuffer);
+    atexit(callGarbageCollector);
+    startScanner(sourceBuffer);
 
-	/* Start parsing */
-	printf("\nParsing the source file...\n\n");
-	startParser();
+    printf("\nParsing the source file...\n\n");
+    startParser();
 
-	printf("\nNumber of Parser errors: %d\n", numParserErrors);
+    printf("\nNumber of Parser errors: %d\n", numParserErrors);
+    printBNFData(psData);
 
-	/* Prints the statistics */
-	printBNFData(psData);
-
-	return (EXIT_SUCCESS); /* same effect as exit(0) */
-
+    return EXIT_SUCCESS;
 }
 
 /*
 ************************************************************
- * Error printing function with variable number of arguments
- * Params: Variable arguments, using formats from C language.
- *	 - Internal vars use list of arguments and types from stdarg.h
- *   - NOTE: The format is using signature from C Language
+* Error printing function
 ************************************************************
 */
-
 nl_void printParserError(nl_string fmt, ...) {
-
-	va_list ap;
-	va_start(ap, fmt);
-
-	(nl_void)vfprintf(stderr, fmt, ap);
-	va_end(ap);
-
-	/* Move to new line */
-	if (strchr(fmt, '\n') == NULL)
-		fprintf(stderr, "\n");
+    va_list ap;
+    va_start(ap, fmt);
+    (nl_void)vfprintf(stderr, fmt, ap);
+    va_end(ap);
+    if (strchr(fmt, '\n') == NULL) fprintf(stderr, "\n");
 }
 
 /*
 ************************************************************
-* The function return the size of an open file
-* Param:
-*	- Filename
-* Return:
-*	- Size of the file
+* Display buffer contents
 ************************************************************
 */
-
-nl_long getParserFileSize(nl_string fname) {
-	FILE* input;
-	nl_long flength;
-	input = fopen(fname, "r");
-	if (input == NULL) {
-		printParserError("%s%s", "Cannot open file: ", fname);
-		return 0;
-	}
-	fseek(input, 0L, SEEK_END);
-	flength = ftell(input);
-	fclose(input);
-	return flength;
-}
-
-/*
-************************************************************
-* The function display buffer contents
-* Param:
-*	- Parser to be displayed.
-************************************************************
-*/
-
 nl_void displayParser(BufferPointer ptrBuffer) {
-	printf("\nPrinting input buffer parameters:\n\n");
-	printf("The capacity of the buffer is:  %d\n", readerGetSize(ptrBuffer));
-	printf("The current size of the buffer is:  %d\n", readerGetPosWrte(ptrBuffer));
-	printf("\nPrinting input buffer contents:\n\n");
-	readerRecover(ptrBuffer);
-	readerPrint(ptrBuffer);
+    printf("\nPrinting input buffer parameters:\n\n");
+    printf("The capacity of the buffer is:  %d\n", readerGetSize(ptrBuffer));
+    printf("The current size of the buffer is:  %d\n", readerGetPosWrte(ptrBuffer));
+    printf("\nPrinting input buffer contents:\n\n");
+    readerRecover(ptrBuffer);
+    readerPrint(ptrBuffer);
 }
 
 /*
 ************************************************************
-* The function frees all dynamically allocated memory.
-* This function is always called despite how the program terminates - normally or abnormally.
+* Get file size
 ************************************************************
 */
+nl_long getParserFileSize(nl_string fname) {
+    FILE* input;
+    nl_long flength;
+    input = fopen(fname, "r");
+    if (input == NULL) {
+        printParserError("%s%s", "Cannot open file: ", fname);
+        return 0;
+    }
+    fseek(input, 0L, SEEK_END);
+    flength = ftell(input);
+    fclose(input);
+    return flength;
+}
 
+/*
+************************************************************
+* Garbage collector
+************************************************************
+*/
 nl_void callGarbageCollector(nl_void) {
-	if (syntaxErrorNumber)
-		printf("\nSyntax errors: %d\n", syntaxErrorNumber);
-	printf("\nCollecting garbage...\n");
-	readerFree(sourceBuffer);
-	readerFree(stringLiteralTable);
+    if (syntaxErrorNumber) printf("\nSyntax errors: %d\n", syntaxErrorNumber);
+    printf("\nCollecting garbage...\n");
+    readerFree(sourceBuffer);
+    readerFree(stringLiteralTable);
+}
+
+/*
+************************************************************
+* Check if string is a number
+************************************************************
+*/
+nl_int isNumber(const nl_string ns) {
+    nl_char c;
+    nl_int i = 0;
+    if (ns == NULL) return 0;
+    while ((c = ns[i++]) != 0) {  // Fixed from == 0 to != 0
+        if (!isdigit(c)) return 0;
+    }
+    return 1;
 }

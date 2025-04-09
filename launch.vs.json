@@ -9,7 +9,7 @@
       "name": "NoteLang.exe",
       "args": [
         "3",
-        "TestMe.note",
+        "INPUT9_FinalLongCode.note",
         "m",
         "500",
         "20"

@@ -378,47 +378,55 @@ nl_void codeSession() {
     psData.parsHistogram[BNF_codeSession]++;
     //printf("DEBUG: Entering codeSession, lookahead.code = %d\n", lookahead.code);
 
-    nl_int mainCount = 0; // Track occurrences of "main" section
-    nl_char* sectionName; // To store VID_T lexeme
+    nl_int mainCount = 0; // Track "main" sections
+    nl_char* sectionName;
 
-    // Loop until SEOF_T or KW_END
     while (lookahead.code != SEOF_T &&
         !(lookahead.code == KW_T && lookahead.attribute.codeType == KW_END)) {
         //printf("DEBUG: codeSession loop, lookahead.code = %d\n", lookahead.code);
-        if (lookahead.code != KW_T || lookahead.attribute.codeType != KW_section) {
-            printf("%s%s\n", STR_LANGNAME, ": Error: Expected 'section' keyword");
+        switch (lookahead.code) {
+        case CMT_T:
+            comment();
+            break;
+        case KW_T:
+            if (lookahead.attribute.codeType != KW_section) {
+                printf("%s%s%d\n", STR_LANGNAME, ": Error: Unexpected keyword in code session, codeType = ", lookahead.attribute.codeType);
+                printError();
+                syncErrorHandler(BNF_codeSession);
+                break;
+            }
+            matchToken(KW_T, KW_section); // code 8, attribute 1
+
+            if (lookahead.code == VID_T) {
+                sectionName = lookahead.attribute.idLexeme;
+                if (strcmp(sectionName, "main") == 0) {
+                    mainCount++;
+                }
+                matchToken(VID_T, NO_ATTR);
+            }
+            else {
+                printf("%s%s\n", STR_LANGNAME, ": Error: Expected section name");
+                printError();
+                syncErrorHandler(BNF_codeSession);
+                continue;
+            }
+
+            matchToken(LPR_T, NO_ATTR);
+            matchToken(RPR_T, NO_ATTR);
+            matchToken(LBR_T, NO_ATTR);
+            section();
+            matchToken(RBR_T, NO_ATTR);
+            matchToken(EOS_T, NO_ATTR);
+            printf("%s%s\n", STR_LANGNAME, ": Section parsed");
+            break;
+        default:
+            printf("%s%s%d\n", STR_LANGNAME, ": Error: Unexpected token in code session, code = ", lookahead.code);
             printError();
             syncErrorHandler(BNF_codeSession);
             break;
         }
-
-        matchToken(KW_T, KW_section); // Match "section" (code 8, attribute 1)
-
-        // Capture section name (VID_T)
-        if (lookahead.code == VID_T) {
-            sectionName = lookahead.attribute.idLexeme;
-            if (strcmp(sectionName, "main") == 0) {
-                mainCount++;
-            }
-            matchToken(VID_T, NO_ATTR); // Match section name
-        }
-        else {
-            printf("%s%s\n", STR_LANGNAME, ": Error: Expected section name");
-            printError();
-            syncErrorHandler(BNF_codeSession);
-            continue;
-        }
-
-        matchToken(LPR_T, NO_ATTR);   // Match "("
-        matchToken(RPR_T, NO_ATTR);   // Match ")"
-        matchToken(LBR_T, NO_ATTR);   // Match "{"
-        noteStatements();
-        matchToken(RBR_T, NO_ATTR);   // Match "}"
-        matchToken(EOS_T, NO_ATTR);   // Match ";"
-        printf("%s%s\n", STR_LANGNAME, ": Section parsed");
     }
 
-    // Check main section requirement
     if (mainCount == 0) {
         printf("%s%s\n", STR_LANGNAME, ": Error: Program must contain one 'main' section");
         printError();
@@ -495,6 +503,49 @@ nl_void noteStatement() {
     matchToken(EOS_T, NO_ATTR);       // Match ";" (code 9)
 
     printf("%s%s\n", STR_LANGNAME, ": Note statement parsed");
+}
+
+/*
+************************************************************
+* Section Body
+* BNF: <section_body> -> { <var_declaration> | <note_statement> | <comment> }
+* FIRST(<section_body>) = { CMT_T, KW_T(df), NOTE_T }
+************************************************************
+*/
+nl_void section() {
+    psData.parsHistogram[BNF_noteStatements]++; // Reusing noteStatements for stats
+    //printf("DEBUG: Entering sectionBody, lookahead.code = %d\n", lookahead.code);
+
+    while (lookahead.code != RBR_T && lookahead.code != SEOF_T) {
+        //printf("DEBUG: sectionBody loop, lookahead.code = %d\n", lookahead.code);
+        switch (lookahead.code) {
+        case CMT_T:
+            comment();
+            break;
+        case KW_T:
+            if (lookahead.attribute.codeType == KW_df) {
+                varDeclaration();
+            }
+            else {
+                printf("%s%s%d\n", STR_LANGNAME, ": Error: Unexpected keyword in section body, codeType = ", lookahead.attribute.codeType);
+                printError();
+                syncErrorHandler(BNF_noteStatements);
+                return;
+            }
+            break;
+        case NOTE_T:
+            noteStatement();
+            break;
+        default:
+            printf("%s%s%d\n", STR_LANGNAME, ": Error: Unexpected token in section body, code = ", lookahead.code);
+            printError();
+            syncErrorHandler(BNF_noteStatements);
+            return;
+        }
+    }
+
+    //printf("DEBUG: Leaving sectionBody, lookahead.code = %d\n", lookahead.code);
+    printf("%s%s\n", STR_LANGNAME, ": Section body parsed");
 }
 
 /*

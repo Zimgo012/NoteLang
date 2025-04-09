@@ -171,19 +171,20 @@ nl_void program();
 nl_void configurationSession();
 nl_void configStatement();
 nl_void dataSession();
-nl_void varListDeclarations();
 nl_void varDeclaration();
 nl_void codeSession();
 nl_void section();
 nl_void noteStatements();
 nl_void noteStatement();
+nl_void comment();
+nl_void endOfFile();
+nl_void varListDeclarations();
 nl_void iterationStatement();
 nl_void arithmeticExpression();
 nl_void stringExpression();
 nl_void conditionalExpression();
 nl_void relationalExpression();
-nl_void comment();
 nl_void outputStatement();
-nl_void endOfFile();
+
 
 #endif

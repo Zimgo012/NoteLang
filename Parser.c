@@ -64,10 +64,10 @@ nl_void startParser() {
         psData.parsHistogram[i] = 0;
     }
     lookahead = tokenizer();
-    printf("DEBUG: Start lookahead.code = %d\n", lookahead.code);
+//    printf("DEBUG: Start lookahead.code = %d\n", lookahead.code);
     program();
     matchToken(SEOF_T, NO_ATTR);
-    printf("DEBUG: After match SEOF_T, lookahead.code = %d\n", lookahead.code);
+ //   printf("DEBUG: After match SEOF_T, lookahead.code = %d\n", lookahead.code);
     printf("%s%s\n", STR_LANGNAME, ": Source file parsed");
 }
 
@@ -78,8 +78,8 @@ nl_void startParser() {
 */
 nl_void matchToken(nl_int tokenCode, nl_int tokenAttribute) {
     nl_int matchFlag = 1;
-    printf("DEBUG: matchToken called with tokenCode = %d, tokenAttribute = %d, lookahead.code = %d, codeType = %d\n",
-        tokenCode, tokenAttribute, lookahead.code, lookahead.attribute.codeType);
+//    printf("DEBUG: matchToken called with tokenCode = %d, tokenAttribute = %d, lookahead.code = %d, codeType = %d\n",
+//        tokenCode, tokenAttribute, lookahead.code, lookahead.attribute.codeType);
     switch (lookahead.code) {
     case KW_T:
         if (lookahead.attribute.codeType != tokenAttribute)
@@ -92,9 +92,9 @@ nl_void matchToken(nl_int tokenCode, nl_int tokenAttribute) {
     if (matchFlag && lookahead.code == SEOF_T)
         return;
     if (matchFlag) {
-        printf("DEBUG: Match successful, advancing lookahead\n");
+    //    printf("DEBUG: Match successful, advancing lookahead\n");
         lookahead = tokenizer();
-        printf("DEBUG: New lookahead.code = %d\n", lookahead.code);
+    //    printf("DEBUG: New lookahead.code = %d\n", lookahead.code);
         if (lookahead.code == ERR_T) {
             printError();
             lookahead = tokenizer();
@@ -175,7 +175,7 @@ nl_void printError() {
 nl_void program() {
     psData.parsHistogram[BNF_program]++;
     configurationSession();
-    dataSession();
+    dataSession(); 
     codeSession();
     endOfFile();
     printf("%s%s\n", STR_LANGNAME, ": Program parsed");
@@ -199,11 +199,11 @@ nl_void program() {
 */
 nl_void configurationSession() {
     psData.parsHistogram[BNF_configurationSession]++;
-    printf("DEBUG: Entering configurationSession, lookahead.code = %d\n", lookahead.code);
+ //   printf("DEBUG: Entering configurationSession, lookahead.code = %d\n", lookahead.code);
     int hasTempo = 0;  // Track if Tempo config is present
     int hasPrint = 0;  // Track if Print config is present
     while (lookahead.code != SEOF_T) {
-        printf("DEBUG: configurationSession loop, lookahead.code = %d\n", lookahead.code);
+    //    printf("DEBUG: configurationSession loop, lookahead.code = %d\n", lookahead.code);
         switch (lookahead.code) {
         case CMT_T:
             comment();
@@ -242,7 +242,7 @@ exit_config:
         printf("%s%s\n", STR_LANGNAME, ": Error: Missing mandatory Print configuration");
         printError();
     }
-    printf("DEBUG: Leaving configurationSession, lookahead.code = %d\n", lookahead.code);
+//    printf("DEBUG: Leaving configurationSession, lookahead.code = %d\n", lookahead.code);
     printf("%s%s\n", STR_LANGNAME, ": Configuration session parsed");
 }
 
@@ -255,7 +255,7 @@ exit_config:
 */
 nl_void configStatement() {
     psData.parsHistogram[BNF_configStatement]++;
-    printf("DEBUG: Entering configStatement, lookahead.code = %d\n", lookahead.code);
+  //  printf("DEBUG: Entering configStatement, lookahead.code = %d\n", lookahead.code);
     switch (lookahead.code) {
     case KW_T:
         switch (lookahead.attribute.codeType) {
@@ -290,11 +290,11 @@ nl_void configStatement() {
 */
 nl_void dataSession() {
     psData.parsHistogram[BNF_dataSession]++;
-    printf("DEBUG: Entering dataSession, lookahead.code = %d\n", lookahead.code);
+//    printf("DEBUG: Entering dataSession, lookahead.code = %d\n", lookahead.code);
     int hasDeclaration = 0; // Track if at least one declaration exists
 
     while (lookahead.code != SEOF_T) {
-        printf("DEBUG: dataSession loop, lookahead.code = %d\n", lookahead.code);
+    //    printf("DEBUG: dataSession loop, lookahead.code = %d\n", lookahead.code);
         switch (lookahead.code) {
         case CMT_T:
             comment();
@@ -324,11 +324,7 @@ nl_void dataSession() {
     }
 
 exit_data:
-    if (!hasDeclaration) {
-        printf("%s%s\n", STR_LANGNAME, ": Error: Data session requires at least one variable declaration");
-        printError();
-    }
-    printf("DEBUG: Leaving dataSession, lookahead.code = %d\n", lookahead.code);
+ //   printf("DEBUG: Leaving dataSession, lookahead.code = %d\n", lookahead.code);
     printf("%s%s\n", STR_LANGNAME, ": Data session parsed");
 }
 
@@ -341,7 +337,7 @@ exit_data:
 */
 nl_void varDeclaration() {
     psData.parsHistogram[BNF_varDeclaration]++;
-    printf("DEBUG: Entering varDeclaration, lookahead.code = %d\n", lookahead.code);
+//    printf("DEBUG: Entering varDeclaration, lookahead.code = %d\n", lookahead.code);
 
     matchToken(KW_T, KW_df);      // Match "df" (code 8, attribute 0)
     matchToken(VID_T, NO_ATTR);   // Match variable identifier (code 1)
@@ -380,12 +376,12 @@ nl_void varDeclaration() {
 */
 nl_void codeSession() {
     psData.parsHistogram[BNF_codeSession]++;
-    printf("DEBUG: Entering codeSession, lookahead.code = %d\n", lookahead.code);
+   // printf("DEBUG: Entering codeSession, lookahead.code = %d\n", lookahead.code);
 
     // Loop until SEOF_T or KW_END is encountered
     while (lookahead.code != SEOF_T &&
         !(lookahead.code == KW_T && lookahead.attribute.codeType == KW_END)) {
-        printf("DEBUG: codeSession loop, lookahead.code = %d\n", lookahead.code);
+     //   printf("DEBUG: codeSession loop, lookahead.code = %d\n", lookahead.code);
         matchToken(KW_T, KW_section); // Match "section" (code 8, attribute 1)
         matchToken(VID_T, NO_ATTR);   // Match section name (e.g., "main")
         matchToken(LPR_T, NO_ATTR);   // Match "("
@@ -397,7 +393,7 @@ nl_void codeSession() {
         printf("%s%s\n", STR_LANGNAME, ": Section parsed");
     }
 
-    printf("DEBUG: Leaving codeSession, lookahead.code = %d\n", lookahead.code);
+   // printf("DEBUG: Leaving codeSession, lookahead.code = %d\n", lookahead.code);
     printf("%s%s\n", STR_LANGNAME, ": Code session parsed");
 }
 
@@ -410,10 +406,10 @@ nl_void codeSession() {
 */
 nl_void noteStatements() {
     psData.parsHistogram[BNF_noteStatements]++;
-    printf("DEBUG: Entering noteStatements, lookahead.code = %d\n", lookahead.code);
+    //printf("DEBUG: Entering noteStatements, lookahead.code = %d\n", lookahead.code);
 
     while (lookahead.code != RBR_T && lookahead.code != SEOF_T) {
-        printf("DEBUG: noteStatements loop, lookahead.code = %d\n", lookahead.code);
+     //   printf("DEBUG: noteStatements loop, lookahead.code = %d\n", lookahead.code);
         switch (lookahead.code) {
         case NOTE_T:
             noteStatement();
@@ -426,7 +422,7 @@ nl_void noteStatements() {
         }
     }
 
-    printf("DEBUG: Leaving noteStatements, lookahead.code = %d\n", lookahead.code);
+    //printf("DEBUG: Leaving noteStatements, lookahead.code = %d\n", lookahead.code);
     printf("%s%s\n", STR_LANGNAME, ": Note statements parsed");
 }
 
@@ -439,7 +435,7 @@ nl_void noteStatements() {
 */
 nl_void noteStatement() {
     psData.parsHistogram[BNF_noteStatement]++;
-    printf("DEBUG: Entering noteStatement, lookahead.code = %d\n", lookahead.code);
+    //printf("DEBUG: Entering noteStatement, lookahead.code = %d\n", lookahead.code);
 
     matchToken(NOTE_T, NO_ATTR);      // Match note (e.g., C4) (code 26)
     matchToken(OP_NOTE_T, NO_ATTR);   // Match "->" (code 11)
@@ -488,14 +484,14 @@ nl_void comment() {
 */
 nl_void endOfFile() {
     psData.parsHistogram[BNF_endOfFile]++;
-    printf("DEBUG: Entering endOfFile, lookahead.code = %d\n", lookahead.code);
+    //printf("DEBUG: Entering endOfFile, lookahead.code = %d\n", lookahead.code);
     while (lookahead.code == CMT_T) {
         comment();
     }
     if (lookahead.code == KW_T && lookahead.attribute.codeType == KW_END) {
         matchToken(KW_T, KW_END);
         lookahead = tokenizer();
-        printf("DEBUG: After END, lookahead.code = %d\n", lookahead.code);
+     //   printf("DEBUG: After END, lookahead.code = %d\n", lookahead.code);
         if (lookahead.code != SEOF_T) {
             printError();
         }
@@ -506,7 +502,7 @@ nl_void endOfFile() {
     else {
         printError();
     }
-    printf("DEBUG: Leaving endOfFile, lookahead.code = %d\n", lookahead.code);
+   // printf("DEBUG: Leaving endOfFile, lookahead.code = %d\n", lookahead.code);
     printf("%s%s\n", STR_LANGNAME, ": End of file parsed");
 }
 

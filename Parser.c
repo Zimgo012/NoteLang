@@ -376,14 +376,39 @@ nl_void varDeclaration() {
 */
 nl_void codeSession() {
     psData.parsHistogram[BNF_codeSession]++;
-   // printf("DEBUG: Entering codeSession, lookahead.code = %d\n", lookahead.code);
+    //printf("DEBUG: Entering codeSession, lookahead.code = %d\n", lookahead.code);
 
-    // Loop until SEOF_T or KW_END is encountered
+    nl_int mainCount = 0; // Track occurrences of "main" section
+    nl_char* sectionName; // To store VID_T lexeme
+
+    // Loop until SEOF_T or KW_END
     while (lookahead.code != SEOF_T &&
         !(lookahead.code == KW_T && lookahead.attribute.codeType == KW_END)) {
-     //   printf("DEBUG: codeSession loop, lookahead.code = %d\n", lookahead.code);
+        //printf("DEBUG: codeSession loop, lookahead.code = %d\n", lookahead.code);
+        if (lookahead.code != KW_T || lookahead.attribute.codeType != KW_section) {
+            printf("%s%s\n", STR_LANGNAME, ": Error: Expected 'section' keyword");
+            printError();
+            syncErrorHandler(BNF_codeSession);
+            break;
+        }
+
         matchToken(KW_T, KW_section); // Match "section" (code 8, attribute 1)
-        matchToken(VID_T, NO_ATTR);   // Match section name (e.g., "main")
+
+        // Capture section name (VID_T)
+        if (lookahead.code == VID_T) {
+            sectionName = lookahead.attribute.idLexeme;
+            if (strcmp(sectionName, "main") == 0) {
+                mainCount++;
+            }
+            matchToken(VID_T, NO_ATTR); // Match section name
+        }
+        else {
+            printf("%s%s\n", STR_LANGNAME, ": Error: Expected section name");
+            printError();
+            syncErrorHandler(BNF_codeSession);
+            continue;
+        }
+
         matchToken(LPR_T, NO_ATTR);   // Match "("
         matchToken(RPR_T, NO_ATTR);   // Match ")"
         matchToken(LBR_T, NO_ATTR);   // Match "{"
@@ -393,7 +418,17 @@ nl_void codeSession() {
         printf("%s%s\n", STR_LANGNAME, ": Section parsed");
     }
 
-   // printf("DEBUG: Leaving codeSession, lookahead.code = %d\n", lookahead.code);
+    // Check main section requirement
+    if (mainCount == 0) {
+        printf("%s%s\n", STR_LANGNAME, ": Error: Program must contain one 'main' section");
+        printError();
+    }
+    else if (mainCount > 1) {
+        printf("%s%s\n", STR_LANGNAME, ": Error: Multiple 'main' sections detected");
+        printError();
+    }
+
+    //printf("DEBUG: Leaving codeSession, lookahead.code = %d\n", lookahead.code);
     printf("%s%s\n", STR_LANGNAME, ": Code session parsed");
 }
 

@@ -1,0 +1,9 @@
+section main(){
+
+C4 -> {1, ff};
+A5 -> {1, mf};
+B2 -> {1, fff};
+C4 -> {2,ff};
+
+};
+!END

@@ -1,0 +1,32 @@
+# long code sample #
+Tempo = 120 ;
+Print = 1 ;
+
+# variables sample #
+df x = "this is a test";
+df y = 3 ;
+df j = "imong mama" ;
+
+# sections #
+section another(){
+df b = 3 ;
+}; 
+
+section secondSection(){
+df c = 3 ;
+df d = "another variable" ;
+}; 
+
+section thirdSection(){
+df e = " hello ko " ;
+};
+
+# main section # 
+section main(){
+C4 -> {1, ff} ;
+A5 -> {1, mf} ;
+F4 -> {3, ff} ;
+G5 -> {3, mf} ;
+};
+
+!END

@@ -1,0 +1,18 @@
+# Sample code of NOTELANG # 
+# Sample code of NOTELANG # 
+# Sample 
+code of NOTELANG! # 
+Tempo = 120 ;
+Print = 1 ;
+df x = "this is a test";
+df y = 3 ;
+section main(){
+
+C4 -> {1, ff};
+A5 -> {1, mf};
+B2 -> {1, fff};
+C4 -> {2,ff};
+
+};
+
+!END
